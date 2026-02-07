@@ -1,62 +1,16 @@
-# Community Language Learn & Teach Platform
+# Community Language Learn & Teach (CLLT)
+### A Full-Stack Peer-to-Peer Education Ecosystem
 
-A full-stack peer-to-peer ecosystem designed to connect language educators with learners. This platform enables community-driven education through live interaction, video content, and interactive assessments.
+## 📖 Introduction
+The **Community Language Learn & Teach** platform is a digital bridge designed to connect passionate educators with eager learners. Unlike static learning apps, this platform focuses on **live human interaction** and **community-driven content**, allowing users to swap roles between being a student and a teacher.
 
-## 🌟 Features
+Our mission is to empower native speakers to share their expertise while providing students with a structured path to fluency through four main pillars:
+* **Live Interaction:** Real-time online sessions for direct communication.
+* **On-Demand Content:** Ability for teachers to record and upload video lessons.
+* **Reading Literacy:** Integrated modules for reading text and cultural materials.
+* **Knowledge Retention:** Interactive exercises and quizzes to track and test learning progress.
 
-### For Teachers (Educators)
-* **Live Sessions:** Host online real-time classes for students.
-* **Video Library:** Record and upload video lessons for asynchronous learning.
-* **Curriculum Building:** Create and share reading materials.
-* **Assessments:** Design exercises and quizzes to track learner progress.
-
-### For Learners (Students)
-* **Interactive Dashboard:** Access lessons and attend live sessions.
-* **Progress Tracking:** Complete exercises and see results instantly.
-* **Self-Paced Learning:** Watch recorded videos and read text materials at any time.
-
----
-
-## 🛠 Tech Stack
-* **Backend:** Node.js with Express.js
-* **Database:** MySQL (Relational storage for users, roles, and lessons)
-* **Containerization:** Docker & Docker Compose
-* **Database Management:** PHPMyAdmin (included for development)
-
----
-
-## 🚀 Getting Started
-
-### 1. Prerequisites
-Ensure you have the following installed:
-* [Docker Desktop](https://www.docker.com/products/docker-desktop)
-* [Node.js](https://nodejs.org/) (optional, as Docker handles this)
-
-
-
-### 3. Accessing the Platform
-* **Web App:** [http://localhost:3000](http://localhost:3000)
-* **PHPMyAdmin:** [http://localhost:8081](http://localhost:8081) (Use credentials from your `.env` file)
-
----
-
-
-
-
-## 📜 Database Schema
-The project uses two primary roles:
-* **Role 0:** Learner
-* **Role 1:** Teacher
-
-
-
-
-
-
-
-
-
-
+Built on a containerized Node.js and MySQL stack, this platform provides a robust environment for educators to manage their curriculum and for learners to master new languages within a supportive community
 
 # MySQL, PHPMyAdmin and Node.js (ready for Express development)
 
