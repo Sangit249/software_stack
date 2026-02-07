@@ -1,3 +1,63 @@
+# Community Language Learn & Teach Platform
+
+A full-stack peer-to-peer ecosystem designed to connect language educators with learners. This platform enables community-driven education through live interaction, video content, and interactive assessments.
+
+## 🌟 Features
+
+### For Teachers (Educators)
+* **Live Sessions:** Host online real-time classes for students.
+* **Video Library:** Record and upload video lessons for asynchronous learning.
+* **Curriculum Building:** Create and share reading materials.
+* **Assessments:** Design exercises and quizzes to track learner progress.
+
+### For Learners (Students)
+* **Interactive Dashboard:** Access lessons and attend live sessions.
+* **Progress Tracking:** Complete exercises and see results instantly.
+* **Self-Paced Learning:** Watch recorded videos and read text materials at any time.
+
+---
+
+## 🛠 Tech Stack
+* **Backend:** Node.js with Express.js
+* **Database:** MySQL (Relational storage for users, roles, and lessons)
+* **Containerization:** Docker & Docker Compose
+* **Database Management:** PHPMyAdmin (included for development)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+Ensure you have the following installed:
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* [Node.js](https://nodejs.org/) (optional, as Docker handles this)
+
+
+
+### 3. Accessing the Platform
+* **Web App:** [http://localhost:3000](http://localhost:3000)
+* **PHPMyAdmin:** [http://localhost:8081](http://localhost:8081) (Use credentials from your `.env` file)
+
+---
+
+
+
+
+## 📜 Database Schema
+The project uses two primary roles:
+* **Role 0:** Learner
+* **Role 1:** Teacher
+
+
+
+
+
+
+
+
+
+
+
 # MySQL, PHPMyAdmin and Node.js (ready for Express development)
 
 This will install Mysql and phpmyadmin (including all dependencies to run Phpmyadmin) AND node.js
