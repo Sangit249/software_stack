@@ -12,6 +12,20 @@ Our mission is to empower native speakers to share their expertise while providi
 
 Built on a containerized Node.js and MySQL stack, this platform provides a robust environment for educators to manage their curriculum and for learners to master new languages within a supportive community
 
+## Ethical Issues
+
+- **Data Privacy**  
+  The application stores personal information such as user profiles and messages, which must be handled responsibly to protect user privacy and maintain trust.
+
+- **User Safety and Trust**  
+  As users interact with people they may not know, there is a risk of inappropriate behaviour, harassment, or misuse of the platform.
+
+- **Accessibility and Inclusion**  
+  Users have different levels of technical skills and language confidence. Poor design could exclude some users from effectively using the application.
+
+- **Fair Use of the Platform**  
+  The platform may be misused for commercial or promotional purposes instead of its intended goal of community-based language exchange.
+
 # MySQL, PHPMyAdmin and Node.js (ready for Express development)
 
 This will install Mysql and phpmyadmin (including all dependencies to run Phpmyadmin) AND node.js
