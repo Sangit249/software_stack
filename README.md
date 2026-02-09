@@ -12,6 +12,14 @@ Our mission is to empower native speakers to share their expertise while providi
 
 Built on a containerized Node.js and MySQL stack, this platform provides a robust environment for educators to manage their curriculum and for learners to master new languages within a supportive community
 
+## ✨ Key Features
+
+### 🌍 Language Exchange Capabilities
+* **Dual-Role System:** Users can switch between **Learner** (Role 0) and **Teacher** (Role 1) roles.
+* **Virtual Classroom:** Integration for real-time video calls and conversational practice.
+* **Lesson Library:** A dedicated repository for teachers to upload and manage recorded video content.
+* **Interactive Reading:** Text modules designed for cultural literacy and reading comprehension.
+* **Progress Tracking:** Custom quiz builders for teachers and performance dashboards for learners.
 ## Ethical Issues
 
 - **Data Privacy**  
