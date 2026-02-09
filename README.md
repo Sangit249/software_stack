@@ -28,11 +28,11 @@ Built on a containerized Node.js and MySQL stack, this platform provides a robus
 
 # MySQL, PHPMyAdmin and Node.js (ready for Express development)
 
-This will install Mysql and phpmyadmin (including all dependencies to run Phpmyadmin) AND node.js
+ WE will install Mysql and phpmyadmin (including all dependencies to run Phpmyadmin) AND node.js
 
 This receipe is for development - Node.js is run in using supervisor: changes to any file in the app will trigger a rebuild automatically.
 
-For security, this receipe uses a .env file for credentials.  A sample is provided in the env-sample file. If using these files for a fresh project, copy the env-sample file to a file called .env.  Do NOT commit the changed .env file into your new project for security reasons (in the node package its included in .gitignore so you can't anyway)
+For security, this receipe uses a .env file for credentials.  
 
 In node.js, we use the MySQl2 packages (to avoid problems with MySQL8) and the dotenv package to read the environment variables.
 
@@ -40,7 +40,7 @@ Local files are mounted into the container using the 'volumes' directive in the 
 
 ### Super-quickstart your new project:
 
-* Make sure that you don't have any other containers running usind docker ps
+* Make sure that  don't have any other containers running usind docker ps
 * run ```docker-compose up --build```
 
 #### Visit phphmyadmin at:
@@ -51,12 +51,6 @@ http://localhost:8081/
 
 http://localhost:3000
 
-For reference, see the video at: https://roehampton.cloud.panopto.eu/Panopto/Pages/Viewer.aspx?id=6f290a6b-ba94-4729-9632-adcf00ac336e
-
-NB if you are running this on your own computer rather than the azure labs that has been set up for you, you will need to install the following:
-
-* node.js  (windows: https://nodejs.org/en/download/)
-* docker desktop (for windows, this will also prompt you to install linux subsystem for windows https://docs.docker.com/desktop/windows/install/ )
 
 ### Whats provided in these scaffolding files?
 
