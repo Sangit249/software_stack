@@ -1,3 +1,38 @@
+# Community Language Learn & Teach (CLLT)
+### A Full-Stack Peer-to-Peer Education Ecosystem
+
+## 📖 Introduction
+The **Community Language Learn & Teach** platform is a digital bridge designed to connect passionate educators with eager learners. Unlike static learning apps, this platform focuses on **live human interaction** and **community-driven content**, allowing users to swap roles between being a student and a teacher.
+
+Our mission is to empower native speakers to share their expertise while providing students with a structured path to fluency through four main pillars:
+* **Live Interaction:** Real-time online sessions for direct communication.
+* **On-Demand Content:** Ability for teachers to record and upload video lessons.
+* **Reading Literacy:** Integrated modules for reading text and cultural materials.
+* **Knowledge Retention:** Interactive exercises and quizzes to track and test learning progress.
+
+Built on a containerized Node.js and MySQL stack, this platform provides a robust environment for educators to manage their curriculum and for learners to master new languages within a supportive community
+
+## ✨ Key Features
+
+### 🌍 Language Exchange Capabilities
+* **Dual-Role System:** Users can switch between **Learner** (Role 0) and **Teacher** (Role 1) roles.
+* **Virtual Classroom:** Integration for real-time video calls and conversational practice.
+* **Lesson Library:** A dedicated repository for teachers to upload and manage recorded video content.
+* **Interactive Reading:** Text modules designed for cultural literacy and reading comprehension.
+* **Progress Tracking:** Custom quiz builders for teachers and performance dashboards for learners.
+## Ethical Issues
+
+- **Data Privacy**  
+  The application stores personal information such as user profiles and messages, which must be handled responsibly to protect user privacy and maintain trust.
+
+- **User Safety and Trust**  
+  As users interact with people they may not know, there is a risk of inappropriate behaviour, harassment, or misuse of the platform.
+
+- **Accessibility and Inclusion**  
+  Users have different levels of technical skills and language confidence. Poor design could exclude some users from effectively using the application.
+
+- **Fair Use of the Platform**  
+  The platform may be misused for commercial or promotional purposes instead of its intended goal of community-based language exchange.
 # MySQL, PHPMyAdmin and Node.js (ready for Express development)
 
 This will install Mysql and phpmyadmin (including all dependencies to run Phpmyadmin) AND node.js
