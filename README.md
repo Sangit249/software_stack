@@ -1,7 +1,7 @@
 # Community Language Learn & Teach (CLLT)
 ### A Full-Stack Peer-to-Peer Education Ecosystem
 
-## 📖 Introduction
+##  Introduction
 The **Community Language Learn & Teach** platform is a digital bridge designed to connect passionate educators with eager learners. Unlike static learning apps, this platform focuses on **live human interaction** and **community-driven content**, allowing users to swap roles between being a student and a teacher.
 
 Our mission is to empower native speakers to share their expertise while providing students with a structured path to fluency through four main pillars:
@@ -26,9 +26,9 @@ Built on a containerized Node.js and MySQL stack, this platform provides a robus
 - **Fair Use of the Platform**  
   The platform may be misused for commercial or promotional purposes instead of its intended goal of community-based language exchange.
 
-  ## ✨ Key Features
+  ##  Key Features
 
-### 🌍 Language Exchange Capabilities
+###  Language Exchange Capabilities
 * **Dual-Role System:** Users can switch between **Learner** (Role 0) and **Teacher** (Role 1) roles.
 * **Virtual Classroom:** Integration for real-time video calls and conversational practice.
 * **Lesson Library:** A dedicated repository for teachers to upload and manage recorded video content.
