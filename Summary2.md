@@ -115,6 +115,3 @@ The entire development environment is containerised using **Docker** and **Docke
 | Containerisation | Docker and Docker Compose |
 | Environment Config | `.env` file via `dotenv` |
 
----
-
-> Built as part of a group software engineering project at the University of Roehampton.
