@@ -114,7 +114,6 @@ The entire development environment is containerised using **Docker** and **Docke
 | DB Management | PHPMyAdmin |
 | Containerisation | Docker and Docker Compose |
 | Environment Config | `.env` file via `dotenv` |
-| Live Reloading | Supervisor |
 
 ---
 
