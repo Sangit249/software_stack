@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  h2 Learning Sessions
+
+  table
+    thead
+      tr
+        th Session ID
+        th Learner ID
+        th Learner Name
+        th Teacher ID
+        th Teacher Name
+        th Meeting Place
+        th Scheduled Time
+        th Initial Message
+        th Status
+    tbody
+      each session in sessions
+        tr
+          td= session.SessionID
+          td= session.LearnerID
+          td= session.LearnerName
+          td= session.TeacherID
+          td= session.TeacherName
+          td= session.Meeting_Place
+          td= session.Scheduled_Time
+          td= session.Initial_Message
+          td= session.Status

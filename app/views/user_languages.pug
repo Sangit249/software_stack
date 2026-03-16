@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h2 User Languages
+
+  table
+    thead
+      tr
+        th User ID
+        th User Name
+        th Language ID
+        th Language Name
+    tbody
+      each item in userLanguages
+        tr
+          td= item.UserID
+          td= item.Full_Name
+          td= item.LanguageID
+          td= item.Language_Name

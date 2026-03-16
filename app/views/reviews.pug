@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h2 Reviews
+
+  table
+    thead
+      tr
+        th Review ID
+        th Session ID
+        th Star Rating
+        th Comment
+    tbody
+      each review in reviews
+        tr
+          td= review.ReviewID
+          td= review.SessionID
+          td= review.Star_Rating
+          td= review.Comment

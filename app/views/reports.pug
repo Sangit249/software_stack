@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h2 Reports
+
+  table
+    thead
+      tr
+        th Report ID
+        th Reporter ID
+        th Reporter Name
+        th Reported User ID
+        th Reported User Name
+        th Reason
+        th Status
+    tbody
+      each report in reports
+        tr
+          td= report.ReportID
+          td= report.ReporterID
+          td= report.ReporterName
+          td= report.ReportedUserID
+          td= report.ReportedUserName
+          td= report.Reason
+          td= report.Status

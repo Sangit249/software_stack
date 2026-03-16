@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h2 Languages
+
+  table
+    thead
+      tr
+        th Language ID
+        th Language Name
+    tbody
+      each language in languages
+        tr
+          td= language.LanguageID
+          td= language.Language_Name

@@ -11,34 +11,46 @@ app.set('views', './app/views');
 // Add static files location
 app.use(express.static("static"));
 
-// ✅ Add body parsing so POST requests work
+// Add body parsing so POST requests work
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Get the functions in the db.js file to use
 const db = require('./services/db');
 
-// ✅ Login routes
-app.get("/login", (req, res) => {
-    res.render("login", { error: null });
+
+
+// Create a route for root - ////
+// app.get("/", function(req, res) {
+//     console.log("root route executes");
+//     // Set up an array of data
+//     var test_data = ['one', 'two', 'three', 'four'];
+//     // Send the array through to the template as a variable called data
+//     res.render("index", {'title':'My index page', 'heading':'My heading', 'data':test_data});
+// });
+
+// Task 2 display a formatted list of students
+app.get("/", function(req, res) {
+    var sql = 'select * from Students';
+    db.query(sql).then(results => {
+    	    // Send the results rows to the all-students template
+    	    // The rows will be in a variable called data
+        res.render('all-students', {data: results});
+    });
 });
 
-app.post("/login", (req, res) => {
-    const { email, password } = req.body;
-    console.log("Login attempt:", email, password);
+// create a route for a single student page 
+app.get("/student-single/:id", function(req,res) {
+    var sId = req.params.id;
+    var sql = "SELECT * FROM Students WHERE id =?";
+    db.query(sql,[sId]).then(results => {
+        // results[0] contains the single student object
+        res.render("student-single", {"student": results[0]});
 
-    // Example login logic — replace with real authentication
-    if (email === "test@example.com" && password === "1234") {
-        res.send("Login successful!");
-    } else {
-        res.render("login", { error: "Invalid email or password" });
-    }
+    });
 });
 
-// Root route redirects to login
-app.get("/", (req, res) => {
-    res.redirect("/login");
-});
+
 
 // Your other routes remain exactly the same
 app.get("/db_test", function(req, res) {

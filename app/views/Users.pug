@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  h2 Users
+
+  table
+    thead
+      tr
+        th User ID
+        th Full Name
+        th Email
+        th Role
+        th Bio
+        th Average Rating
+    tbody
+      each user in users
+        tr
+          td= user.UserID
+          td= user.Full_Name
+          td= user.Email
+          td= user.Role
+          td= user.Bio
+          td= user.Average_Rating
