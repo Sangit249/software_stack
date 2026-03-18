@@ -42,7 +42,7 @@ Acceptance criteria:
 
 ### Language Listings
 
-**US-04 — List myself as a teacher**
+**US-04 - List myself as a teacher**
 
 *As a user who speaks a language fluently, I want to create a teaching listing so that learners can find and connect with me.*
 
@@ -54,7 +54,7 @@ Acceptance criteria:
 
 ---
 
-**US-05 — Browse available teachers**
+**US-05 - Browse available teachers**
 
 *As a learner, I want to browse all available teaching listings so that I can find someone to help me learn the language I am interested in.*
 
@@ -66,7 +66,7 @@ Acceptance criteria:
 
 ---
 
-**US-06 — View a teacher's detail page**
+**US-06 - View a teacher's detail page**
 
 *As a learner, I want to click on a teaching listing to see full details about the teacher so that I can decide whether to request a session.*
 
@@ -80,7 +80,7 @@ Acceptance criteria:
 
 ### Session Requests
 
-**US-07 — Request a language session**
+**US-07 - Request a language session**
 
 *As a learner, I want to send a session request to a teacher so that we can arrange a time to practise together.*
 
@@ -92,7 +92,7 @@ Acceptance criteria:
 
 ---
 
-**US-08 — Accept or decline a session request**
+**US-08 - Accept or decline a session request**
 
 *As a teacher, I want to accept or decline incoming session requests so that I can manage my own time and availability.*
 
@@ -106,7 +106,7 @@ Acceptance criteria:
 
 ### Discovery and Search
 
-**US-09 — Search for a language**
+**US-09 - Search for a language**
 
 *As a learner, I want to search for a specific language so that I can quickly find relevant teachers without browsing all listings.*
 
@@ -118,7 +118,7 @@ Acceptance criteria:
 
 ---
 
-**US-10 — Filter listings by tag**
+**US-10 - Filter listings by tag**
 
 *As a learner, I want to filter teacher listings by tags such as beginner-friendly or conversation practice so that I can find sessions that match my learning goals.*
 
@@ -132,7 +132,7 @@ Acceptance criteria:
 
 ### Dashboard and Progress
 
-**US-11 — View my upcoming sessions**
+**US-11 - View my upcoming sessions**
 
 *As a user, I want to see a list of my confirmed sessions so that I can keep track of my learning or teaching schedule.*
 
@@ -144,7 +144,7 @@ Acceptance criteria:
 
 ---
 
-**US-12 — Leave a rating after a session**
+**US-12 - Leave a rating after a session**
 
 *As a learner, I want to rate a teacher after our session so that other users can benefit from honest feedback about the quality of teaching.*
 
