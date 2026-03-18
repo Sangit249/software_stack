@@ -4,7 +4,7 @@
 
 ### User Accounts
 
-**US-01 — Register an account**
+**US-01 - Register an account**
 
 *As a new visitor, I want to register with my name, email address, and a password so that I can access the platform and join the language community.*
 
@@ -16,7 +16,7 @@ Acceptance criteria:
 
 ---
 
-**US-02 — Log in**
+**US-02 - Log in**
 
 *As a registered user, I want to log in with my email and password so that I can access my profile and language sessions.*
 
@@ -28,7 +28,7 @@ Acceptance criteria:
 
 ---
 
-**US-03 — View and edit my profile**
+**US-03 - View and edit my profile**
 
 *As a logged-in user, I want to view and edit my profile so that other users can learn about my language background and availability.*
 
