@@ -120,7 +120,7 @@ Acceptance criteria:
 
 **US-10 - Filter listings by tag**
 
-*As a learner, I want to filter teacher listings by tags such as beginner-friendly or conversation practice so that I can find sessions that match my learning goals.*
+*As a learner, I want to filter teacher listings by tags such as beginner friendly or conversation practice so that I can find sessions that match my learning goals.*
 
 Acceptance criteria:
 
