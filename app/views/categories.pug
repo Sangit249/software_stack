@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h2 Language Categories
+
+  if categories && categories.length
+    table(border="1" cellpadding="10" cellspacing="0")
+      thead
+        tr
+          th Category ID
+          th Category Name
+          th Description
+      tbody
+        each category in categories
+          tr
+            td= category.CategoryID
+            td= category.Category_Name
+            td= category.Description
+  else
+    p No categories found.

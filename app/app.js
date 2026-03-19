@@ -23,10 +23,7 @@ const db = require('./services/db');
 // HOME ROUTE
 
 app.get("/", function(req, res) {
-    res.render("index", {
-        title: "Home",
-        heading: "Language Exchange Platform"
-    });
+    res.render("home", { title: "Home" });
 });
 
 
@@ -260,42 +257,20 @@ app.get("/profile/:id", function(req, res) {
 });
 
 // routes for a   language categories
-app.get("/language-categories", function(req, res) {
-    Promise.all([
-        db.query("SELECT LanguageID, Language_Name FROM Languages"),
+app.get("/categories", function(req, res) {
+    var sql = `
+        SELECT CategoryID, Category_Name, Description
+        FROM Categories
+    `;
 
-        db.query(`
-            SELECT 
-                l.Language_Name,
-                COUNT(ul.UserID) AS totalUsers
-            FROM Languages l
-            LEFT JOIN User_Languages ul ON l.LanguageID = ul.LanguageID
-            GROUP BY l.LanguageID, l.Language_Name
-            ORDER BY totalUsers DESC
-            LIMIT 5
-        `),
-
-        db.query(`
-            SELECT 
-                l.Language_Name,
-                COUNT(ul.UserID) AS totalUsers
-            FROM Languages l
-            LEFT JOIN User_Languages ul ON l.LanguageID = ul.LanguageID
-            GROUP BY l.LanguageID, l.Language_Name
-            ORDER BY l.Language_Name ASC
-        `)
-    ])
-    .then(results => {
-        res.render("language_categories", {
-            title: "Language Categories",
-            languages: results[0],
-            popular: results[1],
-            distribution: results[2]
+    db.query(sql).then(results => {
+        res.render("categories", {
+            title: "Categories",
+            categories: results
         });
-    })
-    .catch(err => {
+    }).catch(err => {
         console.error(err);
-        res.status(500).send("Error loading language categories");
+        res.status(500).send("Error loading categories");
     });
 });
 

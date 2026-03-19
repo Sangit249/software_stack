@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h2 Home Page
+  p Welcome to the Language Exchange Platform
+
+  form(action="/search", method="GET")
+    input(type="text", name="q", placeholder="Search here...")
+    button(type="submit") Search
+
+  br
+  br
+
+  .buttons
+    a(href="/users")
+      button(type="button") Users
+
+    a(href="/platform")
+      button(type="button") About Platform
+
+    a(href="/languages")
+      button(type="button") Languages
+
+    a(href="/categories")
+      button(type="button") Categories
