@@ -1,0 +1,66 @@
+extends layout
+
+block content
+  h2 User Profile
+
+  if user
+    h3 Basic Information
+    p
+      strong Name:
+      |  #{user.Full_Name}
+    p
+      strong Email:
+      |  #{user.Email}
+    p
+      strong Role:
+      |  #{user.Role}
+    p
+      strong Bio:
+      |  #{user.Bio}
+    p
+      strong Average Rating:
+      |  #{user.Average_Rating}
+
+    h3 Languages
+    if languages && languages.length
+      ul
+        each lang in languages
+          li= lang.Language_Name
+    else
+      p No languages found.
+
+    h3 Sessions
+    table
+      thead
+        tr
+          th Session ID
+          th User Role
+          th Status
+      tbody
+        if sessions && sessions.length
+          each s in sessions
+            tr
+              td= s.SessionID
+              td= s.UserRole
+              td= s.Status
+        else
+          tr
+            td(colspan="3") No sessions found
+
+    h3 Reviews
+    table
+      thead
+        tr
+          th Rating
+          th Comment
+      tbody
+        if reviews && reviews.length
+          each r in reviews
+            tr
+              td= r.Star_Rating
+              td= r.Comment
+        else
+          tr
+            td(colspan="2") No reviews found
+  else
+    p User not found.

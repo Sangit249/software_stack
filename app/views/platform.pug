@@ -1,0 +1,43 @@
+extends layout
+
+block content
+  h2 Platform Overview
+
+  h3 What This Platform Does
+  ul
+    li Connects learners with teachers
+    li Allows users to exchange languages
+    li Supports session scheduling
+    li Supports reviews and ratings
+    li Supports user reporting
+
+  h3 Statistics
+  table
+    tr
+      th Total Users
+      td= stats.totalUsers
+    tr
+      th Total Languages
+      td= stats.totalLanguages
+    tr
+      th Total Sessions
+      td= stats.totalSessions
+    tr
+      th Pending Reports
+      td= stats.pendingReports
+
+  h3 Recent Sessions
+  table
+    thead
+      tr
+        th Session ID
+        th Learner
+        th Teacher
+        th Status
+    tbody
+      each session in recentSessions
+        tr
+          td= session.SessionID
+          td= session.LearnerName
+          td= session.TeacherName
+          td= session.Status
