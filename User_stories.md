@@ -6,7 +6,7 @@
 
 **US-01 - Register an account**
 
-*As a new visitor, I want to register with my name, email address, and a password so that I can access the platform and join the language community.*
+*As a new visitor, I want to register with my name, email address and a password so that I can access the platform and join the language community.*
 
 Acceptance criteria:
 
