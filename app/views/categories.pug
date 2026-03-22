@@ -1,20 +1,20 @@
 extends layout
 
 block content
-  h2 Language Categories
+  .page-container
+    h2.page-title Language Categories
 
-  if categories && categories.length
-    table(border="1" cellpadding="10" cellspacing="0")
-      thead
-        tr
-          th Category ID
-          th Category Name
-          th Description
-      tbody
-        each category in categories
-          tr
-            td= category.CategoryID
-            td= category.Category_Name
-            td= category.Description
-  else
-    p No categories found.
+    if categories && categories.length
+      each category in categories
+        .info-card
+          h3= category.Category_Name
+          p= category.Description
+
+          if category.languages && category.languages.length
+            ul
+              each lang in category.languages
+                li= lang
+          else
+            p No languages available in this category
+    else
+      p No categories found.

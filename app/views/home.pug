@@ -1,25 +1,64 @@
 extends layout
 
 block content
-  h2 Home Page
-  p Welcome to the Language Exchange Platform
+  .homepage
+    // Top Navigation
+    header.navbar
+      .logo-section
+        h1.logo-text LingoConnect
 
-  form(action="/search", method="GET")
-    input(type="text", name="q", placeholder="Search here...")
-    button(type="submit") Search
+      nav.nav-links
+        a(href="/") Home
+        a(href="/users") Users
+        a(href="/languages") Languages
+        a(href="/categories") Categories
+        a(href="/platform") About Platform
 
-  br
-  br
+    // Hero Section
+    section.hero
+      .hero-content
+        h2 Learn Languages. Teach Skills. Connect Globally.
+        p Join a friendly language exchange platform where learners and teachers help each other grow.
+        
+        form.search-form(action="/search", method="GET")
+          input(type="text", name="q", placeholder="Search languages, users, or teachers...")
+          button(type="submit") Search
 
-  .buttons
-    a(href="/users")
-      button(type="button") Users
+        .hero-buttons
+          a(href="/users")
+            button(type="button") Explore Users
+          a(href="/languages")
+            button(type="button") Browse Languages
+          a(href="/categories")
+            button(type="button") View Categories
 
-    a(href="/platform")
-      button(type="button") About Platform
+    // Features Section
+    section.features
+      h2 Why Use Our Platform?
+      .feature-cards
+        .card
+          h3 Find Language Partners
+          p Connect with learners and teachers from different countries.
 
-    a(href="/languages")
-      button(type="button") Languages
+        .card
+          h3 Learn at Your Level
+          p Practice beginner, intermediate, or advanced language skills.
 
-    a(href="/categories")
-      button(type="button") Categories
+        .card
+          h3 Teach and Share
+          p Help others learn your native language and gain experience.
+
+    // Popular Languages Section
+    section.popular-languages
+      h2 Popular Languages
+      .language-list
+        span.language English
+        span.language Nepali
+        span.language Hindi
+        span.language Spanish
+        span.language French
+        span.language Japanese
+
+    // Footer
+    footer.footer
+      p © 2026 LingoConnect. All rights reserved.

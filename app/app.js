@@ -209,69 +209,111 @@ app.get("/platform", function(req, res) {
 });
 
 // routes for a  profile page 
-app.get("/profile/:id", function(req, res) {
-    const userId = req.params.id;
+app.get("/users/:id", async (req, res) => {
+  const userId = req.params.id;
 
-    Promise.all([
-        db.query("SELECT * FROM Users WHERE UserID = ?", [userId]),
+  try {
+    const userRows = await db.query(
+      "SELECT * FROM Users WHERE UserID = ?",
+      [userId]
+    );
 
-        db.query(`
-            SELECT l.Language_Name
-            FROM User_Languages ul
-            JOIN Languages l ON ul.LanguageID = l.LanguageID
-            WHERE ul.UserID = ?
-        `, [userId]),
+    if (userRows.length === 0) {
+      return res.send("User not found");
+    }
 
-        db.query(`
-            SELECT 
-                SessionID,
-                CASE
-                    WHEN LearnerID = ? THEN 'Learner'
-                    ELSE 'Teacher'
-                END AS UserRole,
-                Status
-            FROM Learning_Sessions
-            WHERE LearnerID = ? OR TeacherID = ?
-        `, [userId, userId, userId]),
+    const user = userRows[0];
 
-        db.query(`
-            SELECT r.Star_Rating, r.Comment
-            FROM Reviews r
-            JOIN Learning_Sessions ls ON r.SessionID = ls.SessionID
-            WHERE ls.LearnerID = ? OR ls.TeacherID = ?
-        `, [userId, userId])
-    ])
-    .then(results => {
-        res.render("profile", {
-            title: "User Profile",
-            user: results[0][0],
-            languages: results[1],
-            sessions: results[2],
-            reviews: results[3]
-        });
-    })
-    .catch(err => {
-        console.error(err);
-        res.status(500).send("Error loading profile");
+    const languages = await db.query(
+      `SELECT 
+         l.Language_Name AS languageName,
+         ul.Language_Type AS languageType,
+         ul.Proficiency_Level AS proficiencyLevel
+       FROM User_Languages ul
+       JOIN Languages l ON ul.LanguageID = l.LanguageID
+       WHERE ul.UserID = ?`,
+      [userId]
+    );
+
+    const availability = await db.query(
+      `SELECT 
+         Day_Of_Week AS dayOfWeek,
+         Start_Time AS startTime,
+         End_Time AS endTime,
+         Time_Zone AS timeZone
+       FROM User_Availability
+       WHERE UserID = ?`,
+      [userId]
+    );
+
+    const interests = await db.query(
+      `SELECT 
+         Interest_Name AS interestName
+       FROM User_Interests
+       WHERE UserID = ?`,
+      [userId]
+    );
+
+    const preferenceRows = await db.query(
+      `SELECT 
+         Practice_Method AS practiceMethod,
+         Preferred_Session_Type AS preferredSessionType,
+         Learning_Goal AS learningGoal
+       FROM User_Preferences
+       WHERE UserID = ?`,
+      [userId]
+    );
+
+    const preferences = preferenceRows.length > 0 ? preferenceRows[0] : null;
+
+    console.log("LANGUAGES:", languages);
+    console.log("AVAILABILITY:", availability);
+    console.log("INTERESTS:", interests);
+    console.log("PREFERENCES:", preferences);
+
+    res.render("profile", {
+      user,
+      languages,
+      availability,
+      interests,
+      preferences
     });
+
+  } catch (error) {
+    console.error("PROFILE ROUTE ERROR:", error);
+    res.send(error.message);
+  }
 });
 
 // routes for a   language categories
-app.get("/categories", function(req, res) {
-    var sql = `
-        SELECT CategoryID, Category_Name, Description
-        FROM Categories
-    `;
+app.get("/categories", async (req, res) => {
+  const rows = await db.query(`
+    SELECT c.CategoryID, c.Category_Name, c.Description, l.Language_Name
+    FROM Categories c
+    LEFT JOIN Languages l ON c.CategoryID = l.CategoryID
+    ORDER BY c.CategoryID
+  `);
 
-    db.query(sql).then(results => {
-        res.render("categories", {
-            title: "Categories",
-            categories: results
-        });
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Error loading categories");
-    });
+  // Group data
+  const categoriesMap = {};
+
+  rows.forEach(row => {
+    if (!categoriesMap[row.CategoryID]) {
+      categoriesMap[row.CategoryID] = {
+        Category_Name: row.Category_Name,
+        Description: row.Description,
+        languages: []
+      };
+    }
+
+    if (row.Language_Name) {
+      categoriesMap[row.CategoryID].languages.push(row.Language_Name);
+    }
+  });
+
+  const categories = Object.values(categoriesMap);
+
+  res.render("categories", { categories });
 });
 
 // Task 2 display a formatted list of students
