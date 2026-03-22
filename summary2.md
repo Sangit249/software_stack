@@ -17,7 +17,7 @@ A full stack peer to peer language education platform built with Node.js, MySQL,
 
 ## Introduction
 
-The **Community Language Learn & Teach** platform is designed to connect passionate educators with eager learners in a structured yet flexible online environment. Unlike static language learning apps that rely solely on pre-built content, this platform puts real human interaction at the centre of the learning experience. The goal is to create a community where people can genuinely teach and learn from one another, rather than just consuming content passively.
+The **Community Language Learn and Teach** platform is designed to connect passionate educators with eager learners in a structured yet flexible online environment. Unlike static language learning apps that rely solely on pre-built content, this platform puts real human interaction at the centre of the learning experience. The goal is to create a community where people can genuinely teach and learn from one another, rather than just consuming content passively.
 
 What makes CLLT unique is its dual role system. A user is not locked into being either a student or a teacher — they can be both, depending on the language. Someone might be teaching English to a French speaker whilst simultaneously learning Japanese from another member of the platform, all under the same account. This flexibility reflects how language learning works in the real world, where people are often at very different stages depending on the language in question.
 
