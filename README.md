@@ -2,7 +2,7 @@
 ### A Full-Stack Peer-to-Peer Education Ecosystem
 
 ##  Introduction
-The **Community Language Learn & Teach** platform is a digital bridge designed to connect passionate educators with eager learners. Unlike static learning apps, this platform focuses on **live human interaction** and **community-driven content**, allowing users to swap roles between being a student and a teacher.
+The **Community Language Learn and Teach** platform is a digital bridge designed to connect passionate educators with eager learners. Unlike static learning apps, this platform focuses on **live human interaction** and **community-driven content**, allowing users to swap roles between being a student and a teacher.
 
 Our mission is to empower native speakers to share their expertise while providing students with a structured path to fluency through four main pillars:
 * **Live Interaction:** Real-time online sessions for direct communication.
