@@ -118,21 +118,9 @@ Acceptance criteria:
 
 ---
 
-**US-10 - Filter listings by tag**
-
-*As a learner, I want to filter teacher listings by tags such as beginner friendly or conversation practice so that I can find sessions that match my learning goals.*
-
-Acceptance criteria:
-
-- Tags are visible on each listing card
-- Clicking a tag filters the listings page to show only matching listings
-- Multiple tags can be selected at once
-
----
-
 ### Dashboard and Progress
 
-**US-11 - View my upcoming sessions**
+**US-10 - View my upcoming sessions**
 
 *As a user, I want to see a list of my confirmed sessions so that I can keep track of my learning or teaching schedule.*
 
@@ -144,7 +132,7 @@ Acceptance criteria:
 
 ---
 
-**US-12 - Leave a rating after a session**
+**US-11 - Leave a rating after a session**
 
 *As a learner, I want to rate a teacher after our session so that other users can benefit from honest feedback about the quality of teaching.*
 
