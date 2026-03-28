@@ -12,37 +12,37 @@ html
       h2 Basic Information
       p
         strong User ID:
-        |  #{user.UserID}
+        |  #{user.id}
       p
         strong Full Name:
-        |  #{user.Full_Name}
+        |  #{user.name}
       p
         strong Username:
-        |  #{user.Username}
+        |  #{user.username}
       p
         strong Email:
-        |  #{user.Email}
+        |  #{user.email}
       p
         strong Country:
-        |  #{user.Country}
+        |  #{user.country}
       p
         strong Role:
-        |  #{user.Role}
+        |  #{user.programme}
       p
         strong Bio:
-        |  #{user.Bio}
+        |  #{user.bio}
       p
         strong Profile Image:
-        |  #{user.Profile_Image}
+        |  #{user.profileImage}
       p
         strong Average Rating:
-        |  #{user.Average_Rating}
+        |  #{user.averageRating}
       p
         strong Joined Date:
-        |  #{user.Joined_Date}
+        |  #{user.joinedDate}
       p
         strong Last Active:
-        |  #{user.Last_Active}
+        |  #{user.lastActive}
     else
       p No user data found.
 
@@ -111,6 +111,14 @@ html
         |  #{preferences.learningGoal || "N/A"}
     else
       p No preferences found.
+
+    hr
+
+    // Logout button to update Last_Active in DB immediately
+    if user && user.id
+      form(method="get", action="/logout")
+        input(type="hidden", name="userId", value=user.id)
+        button(type="submit") Logout (sets Last Active)
 
     hr
 

@@ -15,10 +15,33 @@ app.use(express.static("static"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Add session support so we can render logout link correctly after login
+const session = require('express-session');
+app.use(session({
+    secret: 'your-super-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 }
+}));
+
+// Provide current user in templates
+app.use((req, res, next) => {
+    res.locals.currentUser = req.session.user || null;
+    next();
+});
+
 // Get the functions in the db.js file to use
 const db = require('./services/db');
 
+// Use bcrypt for password hashing and verification
+const bcrypt = require('bcrypt');
+const SALT_ROUNDS = 10; // cost factor for bcrypt hashing
 
+// Import model classes for various database entities
+const { User } = require('./models/userModel');
+const { Category } = require('./models/categoryModel');
+const { Report } = require('./models/reportModel');
+const { Review } = require('./models/reviewModel');
 
 // HOME ROUTE
 
@@ -26,29 +49,155 @@ app.get("/", function(req, res) {
     res.render("home", { title: "Home" });
 });
 
+// ==============================
+// AUTH ROUTES (Login + Signup + Logout)
+// ==============================
+
+// GET /login - display the login page
+app.get("/login", function(req, res) {
+    res.render("login", { title: "Login", error: null, emailOrUsername: "" });
+});
+
+app.post("/login", async function(req, res) {
+    try {
+        const emailOrUsername = (req.body.emailOrUsername || "").trim();
+        const password = (req.body.password || "").trim();
+
+        if (!emailOrUsername || !password) {
+            return res.status(400).render("login", {
+                title: "Login",
+                error: "Please fill in all fields.",
+                emailOrUsername
+            });
+        }
+
+        const sql = "SELECT * FROM Users WHERE Email = ? OR Username = ? LIMIT 1";
+        const rows = await db.query(sql, [emailOrUsername, emailOrUsername]);
+
+        if (!rows || rows.length === 0) {
+            return res.status(401).render("login", {
+                title: "Login",
+                error: "Invalid credentials.",
+                emailOrUsername
+            });
+        }
+
+        const user = rows[0];
+
+        if (!user.Password) {
+            return res.status(401).render("login", {
+                title: "Login",
+                error: "Invalid credentials.",
+                emailOrUsername
+            });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.Password);
+        if (!passwordMatch) {
+            // Invalid password: show generic error (don't leak which field is wrong)
+            return res.status(401).render("login", {
+                title: "Login",
+                error: "Invalid credentials.",
+                emailOrUsername
+            });
+        }
+
+        // Successful login: update last active timestamp in Users table
+        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
+        await db.query(updateLastActiveSql, [user.UserID]);
+
+        // Save user identity in session for navigation and logout
+        req.session.user = {
+            id: user.UserID,
+            name: user.Full_Name,
+            email: user.Email
+        };
+
+        // Log in success. Redirect to user profile page.
+        return res.redirect(`/users/${user.UserID}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).render("login", { title: "Login", error: "Server error", emailOrUsername: req.body.emailOrUsername || "" });
+    }
+});
+
+app.get("/signup", function(req, res) {
+    res.render("signup", { title: "Sign Up", error: null, form: {} });
+});
+
+app.post("/signup", async function(req, res) {
+    try {
+        const form = {
+            fullName: (req.body.fullName || "").trim(),
+            email: (req.body.email || "").trim(),
+            username: (req.body.username || "").trim(),
+            role: (req.body.role || "").trim(),
+            password: (req.body.password || "").trim()
+        };
+
+        if (!form.fullName || !form.email || !form.username || !form.role || !form.password) {
+            return res.status(400).render("signup", { title: "Sign Up", error: "All fields are required.", form });
+        }
+
+        const allowedRoles = ["Learner", "Teacher"];
+        if (!allowedRoles.includes(form.role)) {
+            return res.status(400).render("signup", { title: "Sign Up", error: "Invalid role selected.", form });
+        }
+
+        const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{9,}$/;
+        if (!passwordPattern.test(form.password)) {
+            // Enforce strong password policy
+            return res.status(400).render("signup", {
+                title: "Sign Up",
+                error: "Password must be at least 9 characters and include uppercase, lowercase, number, and special character.",
+                form
+            });
+        }
+
+        // Prevent duplicate accounts by email or username
+        const existingSql = "SELECT UserID FROM Users WHERE Email = ? OR Username = ? LIMIT 1";
+        const existing = await db.query(existingSql, [form.email, form.username]);
+
+        if (existing && existing.length > 0) {
+            return res.status(409).render("signup", { title: "Sign Up", error: "Email or username already exists.", form });
+        }
+
+        const hashedPassword = await bcrypt.hash(form.password, SALT_ROUNDS); // hash pwd before saving
+
+        // Save user account record with hashed password.
+        const insertSql = "INSERT INTO Users (Full_Name, Email, Username, Password, Role) VALUES (?, ?, ?, ?, ?)";
+        const result = await db.query(insertSql, [form.fullName, form.email, form.username, hashedPassword, form.role]);
+
+        if (!result || !result.insertId) {
+            throw new Error("User creation failed");
+        }
+
+        // Redirect to login page after signup
+        return res.redirect("/login");
+    } catch (err) {
+        console.error(err);
+        res.status(500).render("signup", { title: "Sign Up", error: "Server error", form: req.body });
+    }
+});
 
 // ==============================
 // USERS ROUTE
 // URL: /users
 // PUG: users.pug
 // ==============================
-app.get("/users", function(req, res) {
-    var sql = `
-        SELECT UserID, Full_Name, Email, Role, Bio, Average_Rating
-        FROM Users
-    `;
+app.get("/users", async function(req, res) {
+    try {
+        const users = await User.getAllUsers();
 
-    db.query(sql).then(results => {
         res.render("users", {
             title: "Users",
-            users: results
+            users: users
         });
-    }).catch(err => {
+    } catch (err) {
         console.error(err);
         res.status(500).send("Error loading users");
-    });
-});
-
+    }
+}); 
 
 // ==============================
 // LANGUAGES ROUTE
@@ -141,21 +290,18 @@ app.get("/sessions", function(req, res) {
 // URL: /reviews
 // PUG: reviews.pug
 // ==============================
-app.get("/reviews", function(req, res) {
-    var sql = `
-        SELECT ReviewID, SessionID, Star_Rating, Comment
-        FROM Reviews
-    `;
+app.get("/reviews", async function(req, res) {
+    try {
+        const reviews = await Review.getAllReviews();
 
-    db.query(sql).then(results => {
         res.render("reviews", {
             title: "Reviews",
-            reviews: results
+            reviews: reviews
         });
-    }).catch(err => {
+    } catch (err) {
         console.error(err);
         res.status(500).send("Error loading reviews");
-    });
+    }
 });
 
 
@@ -164,32 +310,19 @@ app.get("/reviews", function(req, res) {
 // URL: /reports
 // PUG: reports.pug
 // ==============================
-app.get("/reports", function(req, res) {
-    var sql = `
-        SELECT
-            r.ReportID,
-            r.ReporterID,
-            reporter.Full_Name AS ReporterName,
-            r.ReportedUserID,
-            reported.Full_Name AS ReportedUserName,
-            r.Reason,
-            r.Status
-        FROM Reports r
-        JOIN Users reporter ON r.ReporterID = reporter.UserID
-        JOIN Users reported ON r.ReportedUserID = reported.UserID
-    `;
+app.get("/reports", async function(req, res) {
+    try {
+        const reports = await Report.getAllReports();
 
-    db.query(sql).then(results => {
         res.render("reports", {
             title: "Reports",
-            reports: results
+            reports: reports
         });
-    }).catch(err => {
+    } catch (err) {
         console.error(err);
         res.status(500).send("Error loading reports");
-    });
+    }
 });
-
 
 // routes for a  about page 
 app.get("/platform", function(req, res) {
@@ -210,110 +343,68 @@ app.get("/platform", function(req, res) {
 
 // routes for a  profile page 
 app.get("/users/:id", async (req, res) => {
-  const userId = req.params.id;
+    const userId = req.params.id;
 
-  try {
-    const userRows = await db.query(
-      "SELECT * FROM Users WHERE UserID = ?",
-      [userId]
-    );
+    try {
+        const user = await User.getUserById(userId);
 
-    if (userRows.length === 0) {
-      return res.send("User not found");
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        const [languages, availability, interests, preferences] = await Promise.all([
+            User.getUserLanguages(userId),
+            User.getUserAvailability(userId),
+            User.getUserInterests(userId),
+            User.getUserPreferences(userId)
+        ]);
+
+        res.render("profile", {
+            title: "User Profile",
+            user,
+            languages,
+            availability,
+            interests,
+            preferences
+        });
+    } catch (error) {
+        console.error("PROFILE ROUTE ERROR:", error);
+        res.status(500).send("Error loading profile");
     }
-
-    const user = userRows[0];
-
-    const languages = await db.query(
-      `SELECT 
-         l.Language_Name AS languageName,
-         ul.Language_Type AS languageType,
-         ul.Proficiency_Level AS proficiencyLevel
-       FROM User_Languages ul
-       JOIN Languages l ON ul.LanguageID = l.LanguageID
-       WHERE ul.UserID = ?`,
-      [userId]
-    );
-
-    const availability = await db.query(
-      `SELECT 
-         Day_Of_Week AS dayOfWeek,
-         Start_Time AS startTime,
-         End_Time AS endTime,
-         Time_Zone AS timeZone
-       FROM User_Availability
-       WHERE UserID = ?`,
-      [userId]
-    );
-
-    const interests = await db.query(
-      `SELECT 
-         Interest_Name AS interestName
-       FROM User_Interests
-       WHERE UserID = ?`,
-      [userId]
-    );
-
-    const preferenceRows = await db.query(
-      `SELECT 
-         Practice_Method AS practiceMethod,
-         Preferred_Session_Type AS preferredSessionType,
-         Learning_Goal AS learningGoal
-       FROM User_Preferences
-       WHERE UserID = ?`,
-      [userId]
-    );
-
-    const preferences = preferenceRows.length > 0 ? preferenceRows[0] : null;
-
-    console.log("LANGUAGES:", languages);
-    console.log("AVAILABILITY:", availability);
-    console.log("INTERESTS:", interests);
-    console.log("PREFERENCES:", preferences);
-
-    res.render("profile", {
-      user,
-      languages,
-      availability,
-      interests,
-      preferences
-    });
-
-  } catch (error) {
-    console.error("PROFILE ROUTE ERROR:", error);
-    res.send(error.message);
-  }
 });
 
 // routes for a   language categories
 app.get("/categories", async (req, res) => {
-  const rows = await db.query(`
-    SELECT c.CategoryID, c.Category_Name, c.Description, l.Language_Name
-    FROM Categories c
-    LEFT JOIN Languages l ON c.CategoryID = l.CategoryID
-    ORDER BY c.CategoryID
-  `);
+    try {
+        const rows = await Category.getAllCategoriesWithLanguages();
 
-  // Group data
-  const categoriesMap = {};
+        const categoriesMap = {};
 
-  rows.forEach(row => {
-    if (!categoriesMap[row.CategoryID]) {
-      categoriesMap[row.CategoryID] = {
-        Category_Name: row.Category_Name,
-        Description: row.Description,
-        languages: []
-      };
+        rows.forEach(row => {
+            if (!categoriesMap[row.CategoryID]) {
+                categoriesMap[row.CategoryID] = {
+                    CategoryID: row.CategoryID,
+                    Category_Name: row.Category_Name,
+                    Description: row.Description,
+                    languages: []
+                };
+            }
+
+            if (row.Language_Name) {
+                categoriesMap[row.CategoryID].languages.push(row.Language_Name);
+            }
+        });
+
+        const categories = Object.values(categoriesMap);
+
+        res.render("categories", {
+            title: "Categories",
+            categories
+        });
+    } catch (error) {
+        console.error("CATEGORIES ROUTE ERROR:", error);
+        res.status(500).send("Error loading categories");
     }
-
-    if (row.Language_Name) {
-      categoriesMap[row.CategoryID].languages.push(row.Language_Name);
-    }
-  });
-
-  const categories = Object.values(categoriesMap);
-
-  res.render("categories", { categories });
 });
 
 // Task 2 display a formatted list of students
@@ -403,6 +494,50 @@ app.get("/student/:name/:id", function(req, res) {
             <tr><td>${name}</td><td>${id}</td></tr>
         </table>
     `);
+});
+
+app.post("/logout", async function(req, res) {
+    try {
+        const userId = req.body.userId;
+
+        if (!userId) {
+            return res.status(400).send("userId is required");
+        }
+
+        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
+        await db.query(updateLastActiveSql, [userId]);
+
+        // In a real app, destroy session here if implemented
+        return res.redirect("/");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Logout failed");
+    }
+});
+
+app.get("/logout", async function(req, res) {
+    try {
+        if (!req.session.user) {
+            return res.redirect('/login');
+        }
+
+        const userId = req.session.user.id;
+
+        // Mark user as logged out by updating last active timestamp
+        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
+        await db.query(updateLastActiveSql, [userId]);
+
+        // Destroy session and redirect to home
+        req.session.destroy(err => {
+            if (err) {
+                console.error('Session destroy error', err);
+            }
+            res.redirect('/');
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Logout failed");
+    }
 });
 
 app.get("/db_test/:id", function(req, res) {

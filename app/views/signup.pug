@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  h2 Sign Up
+  if error
+    p(style="color:red")= error
+  form(method="POST", action="/signup")
+    div
+      label(for="fullName") Full Name:
+      input#fullName(type="text", name="fullName", required, value=form.fullName || "")
+    div
+      label(for="email") Email:
+      input#email(type="email", name="email", required, value=form.email || "")
+    div
+      label(for="username") Username:
+      input#username(type="text", name="username", required, value=form.username || "")
+    div
+      label(for="role") Role:
+      select#role(name="role", required)
+        option(value="") Select role
+        option(value="Learner", selected=form.role === 'Learner') Learner
+        option(value="Teacher", selected=form.role === 'Teacher') Teacher
+    div
+      label(for="password") Password:
+      input#password(type="password", name="password", required)
+    div
+      button(type="submit") Create Account
+  p
+    | Already have an account? 
+    a(href="/login") Log in
