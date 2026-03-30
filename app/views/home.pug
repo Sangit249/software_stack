@@ -2,19 +2,10 @@ extends layout
 
 block content
   .homepage
-    // Top Navigation
-    header.navbar
-      .logo-section
-        h1.logo-text LingoConnect
 
-      nav.nav-links
-        a(href="/") Home
-        a(href="/users") Users
-        a(href="/languages") Languages
-        a(href="/categories") Categories
-        a(href="/platform") About Platform
+    if currentUser
+      p Welcome back, #{currentUser.name}!
 
-    // Hero Section
     section.hero
       .hero-content
         h2 Learn Languages. Teach Skills. Connect Globally.
@@ -32,23 +23,19 @@ block content
           a(href="/categories")
             button(type="button") View Categories
 
-    // Features Section
     section.features
       h2 Why Use Our Platform?
       .feature-cards
         .card
           h3 Find Language Partners
           p Connect with learners and teachers from different countries.
-
         .card
           h3 Learn at Your Level
           p Practice beginner, intermediate, or advanced language skills.
-
         .card
           h3 Teach and Share
           p Help others learn your native language and gain experience.
 
-    // Popular Languages Section
     section.popular-languages
       h2 Popular Languages
       .language-list
@@ -59,6 +46,5 @@ block content
         span.language French
         span.language Japanese
 
-    // Footer
     footer.footer
       p © 2026 LingoConnect. All rights reserved.

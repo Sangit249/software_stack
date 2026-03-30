@@ -55,8 +55,9 @@ app.get("/", function(req, res) {
 
 // GET /login - display the login page
 app.get("/login", function(req, res) {
-    res.render("login", { title: "Login", error: null, emailOrUsername: "" });
+    res.render("login", { title: "Login", error: null, emailOrUsername: "", hideNav: true });
 });
+
 
 app.post("/login", async function(req, res) {
     try {
@@ -113,8 +114,8 @@ app.post("/login", async function(req, res) {
             email: user.Email
         };
 
-        // Log in success. Redirect to user profile page.
-        return res.redirect(`/users/${user.UserID}`);
+        // Log in success. Redirect to home page.
+        return res.redirect("/");
     } catch (err) {
         console.error(err);
         res.status(500).render("login", { title: "Login", error: "Server error", emailOrUsername: req.body.emailOrUsername || "" });
@@ -122,7 +123,7 @@ app.post("/login", async function(req, res) {
 });
 
 app.get("/signup", function(req, res) {
-    res.render("signup", { title: "Sign Up", error: null, form: {} });
+    res.render("signup", { title: "Sign Up", error: null, form: {}, hideNav: true });
 });
 
 app.post("/signup", async function(req, res) {
@@ -172,8 +173,14 @@ app.post("/signup", async function(req, res) {
             throw new Error("User creation failed");
         }
 
-        // Redirect to login page after signup
-        return res.redirect("/login");
+        
+         // Auto-login and redirect to profile completion
+        req.session.user = {
+            id: result.insertId,
+            name: form.fullName,
+            email: form.email
+        };
+        return res.redirect("/complete-profile");
     } catch (err) {
         console.error(err);
         res.status(500).render("signup", { title: "Sign Up", error: "Server error", form: req.body });
@@ -562,7 +569,58 @@ app.get("/db_test/:id", function(req, res) {
         res.status(500).send("Database error");
     });
 });
+// GET /complete-profile
+app.get("/complete-profile", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+    const languages = await db.query("SELECT LanguageID, Language_Name FROM Languages");
+    res.render("complete-profile", { title: "Complete Profile", languages, error: null });
+});
 
+// POST /complete-profile
+app.post("/complete-profile", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+    const userId = req.session.user.id;
+    try {
+        const langIds = [].concat(req.body.languageId || []);
+        const langTypes = [].concat(req.body.language_type || []);
+        const profLevels = [].concat(req.body.proficiency_level || []);
+        for (let i = 0; i < langIds.length; i++) {
+            if (!langIds[i]) continue;
+            await db.query(
+                "INSERT INTO User_Languages (UserID, LanguageID, Language_Type, Proficiency_Level) VALUES (?, ?, ?, ?)",
+                [userId, langIds[i], langTypes[i], profLevels[i]]
+            );
+        }
+        const days = [].concat(req.body.day_of_week || []);
+        const starts = [].concat(req.body.start_time || []);
+        const ends = [].concat(req.body.end_time || []);
+        const timezones = [].concat(req.body.time_zone || []);
+        for (let i = 0; i < days.length; i++) {
+            if (!days[i]) continue;
+            await db.query(
+                "INSERT INTO User_Availability (UserID, Day_Of_Week, Start_Time, End_Time, Time_Zone) VALUES (?, ?, ?, ?, ?)",
+                [userId, days[i], starts[i], ends[i], timezones[i]]
+            );
+        }
+        const interests = [].concat(req.body.interest_name || []);
+        for (let interest of interests) {
+            if (!interest.trim()) continue;
+            await db.query(
+                "INSERT INTO User_Interests (UserID, Interest_Name) VALUES (?, ?)",
+                [userId, interest.trim()]
+            );
+        }
+        await db.query(
+            "INSERT INTO User_Preferences (UserID, Practice_Method, Preferred_Session_Type, Learning_Goal) VALUES (?, ?, ?, ?)",
+            [userId, req.body.practice_method, req.body.preferred_session_type, req.body.learning_goal]
+        );
+        return res.redirect("/users/" + userId);
+    } catch (err) {
+        console.error(err);
+        const languages = await db.query("SELECT LanguageID, Language_Name FROM Languages");
+        res.status(500).render("complete-profile", { title: "Complete Profile", languages, error: "Something went wrong. Try again." });
+    }
+});
 
 // Start server on port 3000
 app.listen(3000, function() {

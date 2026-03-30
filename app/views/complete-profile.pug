@@ -1,0 +1,80 @@
+extends layout
+
+block content
+  h2 Complete Your Profile
+
+  if error
+    p= error
+
+  form(action="/complete-profile", method="POST")
+
+    h3 Languages
+    div#languages-container
+      div.lang-row
+        select(name="languageId[]")
+          option(value="") Select Language
+          each lang in languages
+            option(value=lang.LanguageID)= lang.Language_Name
+        select(name="language_type[]")
+          option(value="Native") Native
+          option(value="Fluent") Fluent
+          option(value="Learning") Learning
+          option(value="Teaching") Teaching
+        input(type="text", name="proficiency_level[]", placeholder="Proficiency e.g. Advanced")
+
+    button(type="button", onclick="addLanguage()") + Add Language
+
+    h3 Availability
+    div#availability-container
+      div.avail-row
+        select(name="day_of_week[]")
+          option Monday
+          option Tuesday
+          option Wednesday
+          option Thursday
+          option Friday
+          option Saturday
+          option Sunday
+        input(type="time", name="start_time[]")
+        input(type="time", name="end_time[]")
+        input(type="text", name="time_zone[]", placeholder="e.g. Asia/Kathmandu")
+
+    button(type="button", onclick="addAvailability()") + Add Slot
+
+    h3 Interests
+    div#interests-container
+      input(type="text", name="interest_name[]", placeholder="e.g. Gaming")
+
+    button(type="button", onclick="addInterest()") + Add Interest
+
+    h3 Preferences
+    input(type="text", name="practice_method", placeholder="e.g. Voice Call")
+    input(type="text", name="preferred_session_type", placeholder="e.g. One-to-One")
+    input(type="text", name="learning_goal", placeholder="e.g. Improve English speaking")
+
+    br
+    button(type="submit") Save Profile
+
+  script.
+    function addLanguage() {
+      const container = document.getElementById('languages-container');
+      const row = container.querySelector('.lang-row').cloneNode(true);
+      row.querySelectorAll('select, input').forEach(el => el.value = '');
+      container.appendChild(row);
+    }
+
+    function addAvailability() {
+      const container = document.getElementById('availability-container');
+      const row = container.querySelector('.avail-row').cloneNode(true);
+      row.querySelectorAll('select, input').forEach(el => el.value = '');
+      container.appendChild(row);
+    }
+
+    function addInterest() {
+      const container = document.getElementById('interests-container');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = 'interest_name[]';
+      input.placeholder = 'e.g. Traveling';
+      container.appendChild(input);
+    }
