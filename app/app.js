@@ -622,6 +622,24 @@ app.post("/complete-profile", async function(req, res) {
     }
 });
 
+// ==============================
+// SEARCH ROUTE
+// URL: /search
+// PUG: search.pug
+// ==============================
+app.get("/search", async function(req, res) {
+    const language = (req.query.language || "").trim();
+    try {
+        const users = language ? await User.searchByLanguage(language) : [];
+        console.log("SEARCH QUERY:", language);
+        console.log("SEARCH RESULTS:", users);
+        res.render("search", { title: "Search Results", users, query: language });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading search results");
+    }
+});
+
 // Start server on port 3000
 app.listen(3000, function() {
     console.log(`Server running at http://127.0.0.1:3000`);

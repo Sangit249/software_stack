@@ -12,7 +12,7 @@ block content
         p Join a friendly language exchange platform where learners and teachers help each other grow.
         
         form.search-form(action="/search", method="GET")
-          input(type="text", name="q", placeholder="Search languages, users, or teachers...")
+          input(type="text", name="language", placeholder="Search by language e.g. Spanish...")
           button(type="submit") Search
 
         .hero-buttons
@@ -39,12 +39,9 @@ block content
     section.popular-languages
       h2 Popular Languages
       .language-list
-        span.language English
-        span.language Nepali
-        span.language Hindi
-        span.language Spanish
-        span.language French
-        span.language Japanese
+        each lang in ['English', 'Nepali', 'Hindi', 'Spanish', 'French', 'Japanese']
+          a(href=`/search?language=${lang}`)
+            span.language= lang
 
     footer.footer
       p © 2026 LingoConnect. All rights reserved.

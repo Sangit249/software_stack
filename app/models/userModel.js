@@ -1,25 +1,17 @@
 const db = require('../services/db');
 
 class User {
-    // User ID
     id;
-    // User name
     name;
-    // User email
     email;
-    // User programme
     programme;
-    // User bio
     bio;
-    // User average rating
     averageRating;
-    // Additional fields
     username;
     country;
     profileImage;
     joinedDate;
     lastActive;
-    // User modules
     modules = [];
 
     constructor(id) {
@@ -46,15 +38,11 @@ class User {
     }
     
     async getUserName() {
-        if (!this.name) {
-            await this.populate();
-        }
+        if (!this.name) await this.populate();
     }
     
     async getUserProgramme() {
-        if (!this.programme) {
-            await this.populate();
-        }
+        if (!this.programme) await this.populate();
     }
     
     async getUserModules() {
@@ -70,7 +58,6 @@ class User {
         }
     }
 
-    // Static methods for backward compatibility
     static async getAllUsers() {
         const sql = `SELECT UserID FROM Users`;
         const ids = await db.query(sql);
@@ -138,6 +125,18 @@ class User {
         `;
         const rows = await db.query(sql, [userId]);
         return rows.length > 0 ? rows[0] : null;
+    }
+
+    static async searchByLanguage(language) {
+        const sql = `
+            SELECT DISTINCT u.UserID, u.Full_Name, u.Username, u.Role,
+                ul.Language_Type, ul.Proficiency_Level, l.Language_Name
+            FROM Users u
+            JOIN User_Languages ul ON u.UserID = ul.UserID
+            JOIN Languages l ON ul.LanguageID = l.LanguageID
+            WHERE l.Language_Name LIKE ?
+        `;
+        return await db.query(sql, [`%${language}%`]);
     }
 }
 

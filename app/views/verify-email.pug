@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h2 Verify Your Email
+
+  p We sent a 6-digit code to your email. Enter it below.
+
+  if resent
+    p Code resent successfully.
+
+  if error
+    p= error
+
+  form(action="/verify-email", method="POST")
+    input(type="text", name="code", placeholder="Enter 6-digit code", maxlength="6", required)
+    button(type="submit") Verify
+
+  form(action="/resend-verification", method="POST")
+    button(type="submit") Resend Code
