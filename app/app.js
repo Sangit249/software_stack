@@ -30,6 +30,17 @@ app.use((req, res, next) => {
     next();
 });
 
+// ==============================
+// ADMIN MIDDLEWARE
+// Blocks non-admin users from accessing admin routes
+// ==============================
+function requireAdmin(req, res, next) {
+    if (!req.session.user || req.session.user.role !== 'Admin') {
+        return res.status(403).send("Access denied.");
+    }
+    next();
+}
+
 // Get the functions in the db.js file to use
 const db = require('./services/db');
 
@@ -42,11 +53,77 @@ const { User } = require('./models/userModel');
 const { Category } = require('./models/categoryModel');
 const { Report } = require('./models/reportModel');
 const { Review } = require('./models/reviewModel');
+const { Admin } = require('./models/adminModel');
 
 // HOME ROUTE
-
 app.get("/", function(req, res) {
     res.render("home", { title: "Home" });
+});
+
+
+// ==============================
+// ADMIN ROUTES
+// All protected by requireAdmin middleware
+// Only users with Role = 'Admin' can access these
+// ==============================
+
+// Admin dashboard — shows platform stats
+app.get("/admin", requireAdmin, async function(req, res) {
+    try {
+        const stats = await Admin.getStats();
+        res.render("admin/dashboard", { title: "Admin Dashboard", stats });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading admin dashboard");
+    }
+});
+
+// Admin users — list all users with role and delete controls
+app.get("/admin/users", requireAdmin, async function(req, res) {
+    try {
+        const users = await Admin.getAllUsers();
+        res.render("admin/users", { title: "Manage Users", users });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading users");
+    }
+});
+
+// Admin — delete a user and all their data
+app.post("/admin/users/:id/delete", requireAdmin, async function(req, res) {
+    try {
+        await Admin.deleteUser(req.params.id);
+        return res.redirect("/admin/users");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting user");
+    }
+});
+
+// Admin — change a user's role
+app.post("/admin/users/:id/role", requireAdmin, async function(req, res) {
+    try {
+        const allowedRoles = ["Learner", "Teacher", "Admin"];
+        if (!allowedRoles.includes(req.body.role)) {
+            return res.status(400).send("Invalid role");
+        }
+        await Admin.updateUserRole(req.params.id, req.body.role);
+        return res.redirect("/admin/users");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error updating role");
+    }
+});
+
+// Admin reports — view all reports with user details
+app.get("/admin/reports", requireAdmin, async function(req, res) {
+    try {
+        const reports = await Admin.getAllReports();
+        res.render("admin/reports", { title: "Manage Reports", reports });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading reports");
+    }
 });
 
 // ==============================
@@ -57,7 +134,6 @@ app.get("/", function(req, res) {
 app.get("/login", function(req, res) {
     res.render("login", { title: "Login", error: null, emailOrUsername: "", hideNav: true });
 });
-
 
 app.post("/login", async function(req, res) {
     try {
@@ -95,7 +171,6 @@ app.post("/login", async function(req, res) {
 
         const passwordMatch = await bcrypt.compare(password, user.Password);
         if (!passwordMatch) {
-            // Invalid password: show generic error (don't leak which field is wrong)
             return res.status(401).render("login", {
                 title: "Login",
                 error: "Invalid credentials.",
@@ -107,14 +182,14 @@ app.post("/login", async function(req, res) {
         const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
         await db.query(updateLastActiveSql, [user.UserID]);
 
-        // Save user identity in session for navigation and logout
+        // Save user identity and role in session
         req.session.user = {
             id: user.UserID,
             name: user.Full_Name,
-            email: user.Email
+            email: user.Email,
+            role: user.Role  // needed for admin checks
         };
 
-        // Log in success. Redirect to home page.
         return res.redirect("/");
     } catch (err) {
         console.error(err);
@@ -147,7 +222,6 @@ app.post("/signup", async function(req, res) {
 
         const passwordPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{9,}$/;
         if (!passwordPattern.test(form.password)) {
-            // Enforce strong password policy
             return res.status(400).render("signup", {
                 title: "Sign Up",
                 error: "Password must be at least 9 characters and include uppercase, lowercase, number, and special character.",
@@ -163,9 +237,8 @@ app.post("/signup", async function(req, res) {
             return res.status(409).render("signup", { title: "Sign Up", error: "Email or username already exists.", form });
         }
 
-        const hashedPassword = await bcrypt.hash(form.password, SALT_ROUNDS); // hash pwd before saving
+        const hashedPassword = await bcrypt.hash(form.password, SALT_ROUNDS);
 
-        // Save user account record with hashed password.
         const insertSql = "INSERT INTO Users (Full_Name, Email, Username, Password, Role) VALUES (?, ?, ?, ?, ?)";
         const result = await db.query(insertSql, [form.fullName, form.email, form.username, hashedPassword, form.role]);
 
@@ -173,12 +246,12 @@ app.post("/signup", async function(req, res) {
             throw new Error("User creation failed");
         }
 
-        
-         // Auto-login and redirect to profile completion
+        // Auto-login after signup and store role in session
         req.session.user = {
             id: result.insertId,
             name: form.fullName,
-            email: form.email
+            email: form.email,
+            role: form.role  // needed for admin checks
         };
         return res.redirect("/complete-profile");
     } catch (err) {
@@ -195,16 +268,12 @@ app.post("/signup", async function(req, res) {
 app.get("/users", async function(req, res) {
     try {
         const users = await User.getAllUsers();
-
-        res.render("users", {
-            title: "Users",
-            users: users
-        });
+        res.render("users", { title: "Users", users: users });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading users");
     }
-}); 
+});
 
 // ==============================
 // LANGUAGES ROUTE
@@ -212,22 +281,14 @@ app.get("/users", async function(req, res) {
 // PUG: languages.pug
 // ==============================
 app.get("/languages", function(req, res) {
-    var sql = `
-        SELECT LanguageID, Language_Name
-        FROM Languages
-    `;
-
+    var sql = `SELECT LanguageID, Language_Name FROM Languages`;
     db.query(sql).then(results => {
-        res.render("languages", {
-            title: "Languages",
-            languages: results
-        });
+        res.render("languages", { title: "Languages", languages: results });
     }).catch(err => {
         console.error(err);
         res.status(500).send("Error loading languages");
     });
 });
-
 
 // ==============================
 // USER LANGUAGES ROUTE
@@ -245,18 +306,13 @@ app.get("/user-languages", function(req, res) {
         JOIN Users u ON ul.UserID = u.UserID
         JOIN Languages l ON ul.LanguageID = l.LanguageID
     `;
-
     db.query(sql).then(results => {
-        res.render("user_languages", {
-            title: "User Languages",
-            userLanguages: results
-        });
+        res.render("user_languages", { title: "User Languages", userLanguages: results });
     }).catch(err => {
         console.error(err);
         res.status(500).send("Error loading user languages");
     });
 });
-
 
 // ==============================
 // SESSIONS ROUTE
@@ -279,18 +335,13 @@ app.get("/sessions", function(req, res) {
         JOIN Users learner ON ls.LearnerID = learner.UserID
         JOIN Users teacher ON ls.TeacherID = teacher.UserID
     `;
-
     db.query(sql).then(results => {
-        res.render("sessions", {
-            title: "Learning Sessions",
-            sessions: results
-        });
+        res.render("sessions", { title: "Learning Sessions", sessions: results });
     }).catch(err => {
         console.error(err);
         res.status(500).send("Error loading sessions");
     });
 });
-
 
 // ==============================
 // REVIEWS ROUTE
@@ -300,17 +351,12 @@ app.get("/sessions", function(req, res) {
 app.get("/reviews", async function(req, res) {
     try {
         const reviews = await Review.getAllReviews();
-
-        res.render("reviews", {
-            title: "Reviews",
-            reviews: reviews
-        });
+        res.render("reviews", { title: "Reviews", reviews: reviews });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading reviews");
     }
 });
-
 
 // ==============================
 // REPORTS ROUTE
@@ -320,18 +366,18 @@ app.get("/reviews", async function(req, res) {
 app.get("/reports", async function(req, res) {
     try {
         const reports = await Report.getAllReports();
-
-        res.render("reports", {
-            title: "Reports",
-            reports: reports
-        });
+        res.render("reports", { title: "Reports", reports: reports });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading reports");
     }
 });
 
-// routes for a  about page 
+// ==============================
+// PLATFORM OVERVIEW ROUTE
+// URL: /platform
+// PUG: platform.pug
+// ==============================
 app.get("/platform", function(req, res) {
     res.render("platform", {
         title: "Platform Overview",
@@ -348,16 +394,16 @@ app.get("/platform", function(req, res) {
     });
 });
 
-// routes for a  profile page 
+// ==============================
+// USER PROFILE ROUTE
+// URL: /users/:id
+// PUG: profile.pug
+// ==============================
 app.get("/users/:id", async (req, res) => {
     const userId = req.params.id;
-
     try {
         const user = await User.getUserById(userId);
-
-        if (!user) {
-            return res.status(404).send("User not found");
-        }
+        if (!user) return res.status(404).send("User not found");
 
         const [languages, availability, interests, preferences] = await Promise.all([
             User.getUserLanguages(userId),
@@ -366,27 +412,22 @@ app.get("/users/:id", async (req, res) => {
             User.getUserPreferences(userId)
         ]);
 
-        res.render("profile", {
-            title: "User Profile",
-            user,
-            languages,
-            availability,
-            interests,
-            preferences
-        });
+        res.render("profile", { title: "User Profile", user, languages, availability, interests, preferences });
     } catch (error) {
         console.error("PROFILE ROUTE ERROR:", error);
         res.status(500).send("Error loading profile");
     }
 });
 
-// routes for a   language categories
+// ==============================
+// CATEGORIES ROUTE
+// URL: /categories
+// PUG: categories.pug
+// ==============================
 app.get("/categories", async (req, res) => {
     try {
         const rows = await Category.getAllCategoriesWithLanguages();
-
         const categoriesMap = {};
-
         rows.forEach(row => {
             if (!categoriesMap[row.CategoryID]) {
                 categoriesMap[row.CategoryID] = {
@@ -396,187 +437,44 @@ app.get("/categories", async (req, res) => {
                     languages: []
                 };
             }
-
             if (row.Language_Name) {
                 categoriesMap[row.CategoryID].languages.push(row.Language_Name);
             }
         });
-
-        const categories = Object.values(categoriesMap);
-
-        res.render("categories", {
-            title: "Categories",
-            categories
-        });
+        res.render("categories", { title: "Categories", categories: Object.values(categoriesMap) });
     } catch (error) {
         console.error("CATEGORIES ROUTE ERROR:", error);
         res.status(500).send("Error loading categories");
     }
 });
 
-// Task 2 display a formatted list of students
-app.get("/students", function(req, res) {
-    var sql = 'select * from Students';
-    db.query(sql).then(results => {
-        res.render('all-students', { data: results });
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Error loading students");
-    });
-});
-
-// create a route for a single student page 
-app.get("/student-single/:id", function(req, res) {
-    var sId = req.params.id;
-    var sql = "SELECT * FROM Students WHERE id = ?";
-    db.query(sql, [sId]).then(results => {
-        res.render("student-single", { "student": results[0] });
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Error loading student");
-    });
-});
-
-app.get("/db_test", function(req, res) {
-    var sql = 'select * from test_table';
-    db.query(sql).then(results => {
-        console.log(results);
-        res.send(results);
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Database error");
-    });
-});
-
-app.get("/programmes", function(req, res) {
-    var sql = 'select * from Programme';
-    var output = '<table border="1px">';
-    db.query(sql).then(results => {
-        for (var row of results) {
-            output += '<tr>';
-            output += '<td>' + row.programme_id + '</td>';
-            output += "<td><a href='/programmes/" + row.programme_id + "'>" + row.programme_name + "</a></td>";
-            output += '</tr>';
-        }
-        output += '</table>';
-        res.send(output);
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Error loading programmes");
-    });
-});
-
-app.get("/allstudents", function(req, res) {
-    var sql = 'select * from students';
-    db.query(sql).then(results => {
-        console.log(results);
-        res.json(results);
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Error loading all students");
-    });
-});
-
-app.get("/goodbye", function(req, res) {
-    res.send("Goodbye world!");
-});
-
-app.get("/roehampton", function(req, res) {
-    console.log(req.url);
-    let path = req.url;
-    res.send(path.substring(0, 4));
-});
-
-app.get("/hello/:name", function(req, res) {
-    console.log(req.params);
-    res.send("Hello " + req.params.name);
-});
-
-app.get("/student/:name/:id", function(req, res) {
-    let name = req.params.name;
-    let id = req.params.id;
-    res.send(`
-        <table border="1">
-            <tr><th>Name</th><th>Id</th></tr>
-            <tr><td>${name}</td><td>${id}</td></tr>
-        </table>
-    `);
-});
-
-app.post("/logout", async function(req, res) {
+// ==============================
+// SEARCH ROUTE
+// URL: /search
+// PUG: search.pug
+// ==============================
+app.get("/search", async function(req, res) {
+    const language = (req.query.language || "").trim();
     try {
-        const userId = req.body.userId;
-
-        if (!userId) {
-            return res.status(400).send("userId is required");
-        }
-
-        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
-        await db.query(updateLastActiveSql, [userId]);
-
-        // In a real app, destroy session here if implemented
-        return res.redirect("/");
+        const users = language ? await User.searchByLanguage(language) : [];
+        res.render("search", { title: "Search Results", users, query: language });
     } catch (err) {
         console.error(err);
-        res.status(500).send("Logout failed");
+        res.status(500).send("Error loading search results");
     }
 });
 
-app.get("/logout", async function(req, res) {
-    try {
-        if (!req.session.user) {
-            return res.redirect('/login');
-        }
-
-        const userId = req.session.user.id;
-
-        // Mark user as logged out by updating last active timestamp
-        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
-        await db.query(updateLastActiveSql, [userId]);
-
-        // Destroy session and redirect to home
-        req.session.destroy(err => {
-            if (err) {
-                console.error('Session destroy error', err);
-            }
-            res.redirect('/');
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Logout failed");
-    }
-});
-
-app.get("/db_test/:id", function(req, res) {
-    const requestedId = req.params.id;
-    const sql = "SELECT name FROM test_table WHERE id = ?";
-
-    db.query(sql, [requestedId]).then(result => {
-        if (result.length > 0) {
-            const userName = result[0].name;
-            res.send(`
-                <div style="font-family:Arial; border:2px solid #333; padding:20px; border-radius:10px; width:300px;">
-                    <h2 style="color:#007bff;">User found!</h2>
-                    <p><strong>ID:</strong> ${requestedId}</p>
-                    <p><strong>Name:</strong> ${userName}</p>
-                </div>
-            `);
-        } else {
-            res.send(`<h1>User not found with Id: ${requestedId}</h1>`);
-        }
-    }).catch(err => {
-        console.error(err);
-        res.status(500).send("Database error");
-    });
-});
-// GET /complete-profile
+// ==============================
+// COMPLETE PROFILE ROUTE
+// URL: /complete-profile
+// PUG: complete-profile.pug
+// ==============================
 app.get("/complete-profile", async function(req, res) {
     if (!req.session.user) return res.redirect("/login");
     const languages = await db.query("SELECT LanguageID, Language_Name FROM Languages");
     res.render("complete-profile", { title: "Complete Profile", languages, error: null });
 });
 
-// POST /complete-profile
 app.post("/complete-profile", async function(req, res) {
     if (!req.session.user) return res.redirect("/login");
     const userId = req.session.user.id;
@@ -623,131 +521,93 @@ app.post("/complete-profile", async function(req, res) {
 });
 
 // ==============================
-// SEARCH ROUTE
-// URL: /search
-// PUG: search.pug
+// LOGOUT ROUTES
 // ==============================
-app.get("/search", async function(req, res) {
-    const language = (req.query.language || "").trim();
+app.post("/logout", async function(req, res) {
     try {
-        const users = language ? await User.searchByLanguage(language) : [];
-        console.log("SEARCH QUERY:", language);
-        console.log("SEARCH RESULTS:", users);
-        res.render("search", { title: "Search Results", users, query: language });
+        const userId = req.body.userId;
+        if (!userId) return res.status(400).send("userId is required");
+        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
+        await db.query(updateLastActiveSql, [userId]);
+        return res.redirect("/");
     } catch (err) {
         console.error(err);
-        res.status(500).send("Error loading search results");
+        res.status(500).send("Logout failed");
     }
+});
+
+app.get("/logout", async function(req, res) {
+    try {
+        if (!req.session.user) return res.redirect('/login');
+        const userId = req.session.user.id;
+        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
+        await db.query(updateLastActiveSql, [userId]);
+        req.session.destroy(err => {
+            if (err) console.error('Session destroy error', err);
+            res.redirect('/');
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Logout failed");
+    }
+});
+
+// ==============================
+// LEGACY/TEST ROUTES (from coursework)
+// ==============================
+app.get("/students", function(req, res) {
+    db.query('select * from Students').then(results => {
+        res.render('all-students', { data: results });
+    }).catch(err => { console.error(err); res.status(500).send("Error loading students"); });
+});
+
+app.get("/student-single/:id", function(req, res) {
+    db.query("SELECT * FROM Students WHERE id = ?", [req.params.id]).then(results => {
+        res.render("student-single", { "student": results[0] });
+    }).catch(err => { console.error(err); res.status(500).send("Error loading student"); });
+});
+
+app.get("/db_test", function(req, res) {
+    db.query('select * from test_table').then(results => {
+        console.log(results); res.send(results);
+    }).catch(err => { console.error(err); res.status(500).send("Database error"); });
+});
+
+app.get("/db_test/:id", function(req, res) {
+    db.query("SELECT name FROM test_table WHERE id = ?", [req.params.id]).then(result => {
+        if (result.length > 0) {
+            res.send(`<div><h2>User found!</h2><p>ID: ${req.params.id}</p><p>Name: ${result[0].name}</p></div>`);
+        } else {
+            res.send(`<h1>User not found with Id: ${req.params.id}</h1>`);
+        }
+    }).catch(err => { console.error(err); res.status(500).send("Database error"); });
+});
+
+app.get("/programmes", function(req, res) {
+    db.query('select * from Programme').then(results => {
+        let output = '<table border="1px">';
+        for (var row of results) {
+            output += `<tr><td>${row.programme_id}</td><td><a href='/programmes/${row.programme_id}'>${row.programme_name}</a></td></tr>`;
+        }
+        output += '</table>';
+        res.send(output);
+    }).catch(err => { console.error(err); res.status(500).send("Error loading programmes"); });
+});
+
+app.get("/allstudents", function(req, res) {
+    db.query('select * from students').then(results => {
+        res.json(results);
+    }).catch(err => { console.error(err); res.status(500).send("Error loading all students"); });
+});
+
+app.get("/goodbye", function(req, res) { res.send("Goodbye world!"); });
+app.get("/roehampton", function(req, res) { res.send(req.url.substring(0, 4)); });
+app.get("/hello/:name", function(req, res) { res.send("Hello " + req.params.name); });
+app.get("/student/:name/:id", function(req, res) {
+    res.send(`<table border="1"><tr><th>Name</th><th>Id</th></tr><tr><td>${req.params.name}</td><td>${req.params.id}</td></tr></table>`);
 });
 
 // Start server on port 3000
 app.listen(3000, function() {
     console.log(`Server running at http://127.0.0.1:3000`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// doctype html
-// html
-//   head
-//     meta(charset="UTF-8")
-//     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-//     title= title
-//     style.
-//       body {
-//         font-family: Arial, sans-serif;
-//         margin: 0;
-//         padding: 0;
-//         background: #f4f4f4;
-//       }
-//       header {
-//         background: #222;
-//         color: white;
-//         padding: 15px 20px;
-//       }
-//       nav {
-//         margin-top: 10px;
-//       }
-//       nav a {
-//         color: white;
-//         text-decoration: none;
-//         margin-right: 15px;
-//       }
-//       main {
-//         padding: 20px;
-//       }
-//       table {
-//         width: 100%;
-//         border-collapse: collapse;
-//         background: white;
-//       }
-//       th, td {
-//         border: 1px solid #ccc;
-//         padding: 10px;
-//         text-align: left;
-//       }
-//       th {
-//         background: #eee;
-//       }
-//   body
-//     header
-//       h1 Language Exchange Platform
-//       nav
-//         a(href="/") Home
-//         a(href="/users") Users
-//         a(href="/languages") Languages
-//         a(href="/user-languages") User Languages
-//         a(href="/sessions") Sessions
-//         a(href="/reviews") Reviews
-//         a(href="/reports") Reports
-//     main
-//       block content
