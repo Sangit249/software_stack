@@ -1,0 +1,25 @@
+extends ../layout
+
+block content
+  h2 Manage Reports
+  a(href="/admin") Back to Dashboard
+
+  if reports.length === 0
+    p No reports found.
+  else
+    table
+      thead
+        tr
+          th ID
+          th Reporter
+          th Reported User
+          th Reason
+          th Status
+      tbody
+        each report in reports
+          tr
+            td= report.ReportID
+            td= report.ReporterName
+            td= report.ReportedName
+            td= report.Reason
+            td= report.Status

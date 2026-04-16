@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  h2 Admin Dashboard
+
+  a(href="/") Back to Home
+
+  h3 Platform Stats
+  p Total Users: #{stats.totalUsers}
+  p Total Sessions: #{stats.totalSessions}
+  p Total Reports: #{stats.totalReports}
+  p Pending Reports: #{stats.pendingReports}
+
+  h3 Quick Links
+  a(href="/admin/users") Manage Users
+  |  | 
+  a(href="/admin/reports") Manage Reports

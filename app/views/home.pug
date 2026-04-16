@@ -1,0 +1,47 @@
+extends layout
+
+block content
+  .homepage
+
+    if currentUser
+      p Welcome back, #{currentUser.name}!
+
+    section.hero
+      .hero-content
+        h2 Learn Languages. Teach Skills. Connect Globally.
+        p Join a friendly language exchange platform where learners and teachers help each other grow.
+        
+        form.search-form(action="/search", method="GET")
+          input(type="text", name="language", placeholder="Search by language e.g. Spanish...")
+          button(type="submit") Search
+
+        .hero-buttons
+          a(href="/users")
+            button(type="button") Explore Users
+          a(href="/languages")
+            button(type="button") Browse Languages
+          a(href="/categories")
+            button(type="button") View Categories
+
+    section.features
+      h2 Why Use Our Platform?
+      .feature-cards
+        .card
+          h3 Find Language Partners
+          p Connect with learners and teachers from different countries.
+        .card
+          h3 Learn at Your Level
+          p Practice beginner, intermediate, or advanced language skills.
+        .card
+          h3 Teach and Share
+          p Help others learn your native language and gain experience.
+
+    section.popular-languages
+      h2 Popular Languages
+      .language-list
+        each lang in ['English', 'Nepali', 'Hindi', 'Spanish', 'French', 'Japanese']
+          a(href=`/search?language=${lang}`)
+            span.language= lang
+
+    footer.footer
+      p © 2026 LingoConnect. All rights reserved.

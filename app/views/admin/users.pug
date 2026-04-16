@@ -1,0 +1,42 @@
+extends ../layout
+
+block content
+  h2 Manage Users
+  a(href="/admin") Back to Dashboard
+
+  table
+    thead
+      tr
+        th ID
+        th Name
+        th Username
+        th Email
+        th Role
+        th Joined
+        th Last Active
+        th Actions
+    tbody
+      each user in users
+        tr
+          td= user.UserID
+          td
+            a(href=`/users/${user.UserID}`)= user.Full_Name
+          td= user.Username
+          td= user.Email
+          td= user.Role
+          td= user.Joined_Date
+          td= user.Last_Active
+
+          td
+            // Change role form
+            form(action=`/admin/users/${user.UserID}/role`, method="POST", style="display:inline")
+              select(name="role")
+                option(value="Learner", selected=user.Role==="Learner") Learner
+                option(value="Teacher", selected=user.Role==="Teacher") Teacher
+                option(value="Admin", selected=user.Role==="Admin") Admin
+              button(type="submit") Change Role
+
+            |  
+            // Delete user form
+            form(action=`/admin/users/${user.UserID}/delete`, method="POST", style="display:inline")
+              button(type="submit", onclick="return confirm('Are you sure you want to delete this user?')") Delete

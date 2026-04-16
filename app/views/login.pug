@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h2 Login
+  if error
+    p(style="color:red")= error
+  form(method="POST", action="/login")
+    div
+      label(for="emailOrUsername") Email or Username:
+      input#emailOrUsername(type="text", name="emailOrUsername", required, value=emailOrUsername)
+    div
+      label(for="password") Password:
+      input#password(type="password", name="password", required)
+    div
+      button(type="submit") Login
+  p
+    | Don't have an account? 
+    a(href="/signup") Sign up

@@ -1,66 +1,125 @@
-extends layout
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title User Profile
 
-block content
-  h2 User Profile
+  body
+    h1 User Profile
 
-  if user
-    h3 Basic Information
-    p
-      strong Name:
-      |  #{user.Full_Name}
-    p
-      strong Email:
-      |  #{user.Email}
-    p
-      strong Role:
-      |  #{user.Role}
-    p
-      strong Bio:
-      |  #{user.Bio}
-    p
-      strong Average Rating:
-      |  #{user.Average_Rating}
+    if user
+      h2 Basic Information
+      p
+        strong User ID:
+        |  #{user.id}
+      p
+        strong Full Name:
+        |  #{user.name}
+      p
+        strong Username:
+        |  #{user.username}
+      p
+        strong Email:
+        |  #{user.email}
+      p
+        strong Country:
+        |  #{user.country}
+      p
+        strong Role:
+        |  #{user.programme}
+      p
+        strong Bio:
+        |  #{user.bio}
+      p
+        strong Profile Image:
+        |  #{user.profileImage}
+      p
+        strong Average Rating:
+        |  #{user.averageRating}
+      p
+        strong Joined Date:
+        |  #{user.joinedDate}
+      p
+        strong Last Active:
+        |  #{user.lastActive}
+    else
+      p No user data found.
 
-    h3 Languages
-    if languages && languages.length
-      ul
-        each lang in languages
-          li= lang.Language_Name
+    hr
+
+    h2 Languages
+    if languages && languages.length > 0
+      table(border="1")
+        thead
+          tr
+            th Language
+            th Language Type
+            th Proficiency Level
+        tbody
+          each language in languages
+            tr
+              td= language.languageName || "N/A"
+              td= language.languageType || "N/A"
+              td= language.proficiencyLevel || "N/A"
     else
       p No languages found.
 
-    h3 Sessions
-    table
-      thead
-        tr
-          th Session ID
-          th User Role
-          th Status
-      tbody
-        if sessions && sessions.length
-          each s in sessions
-            tr
-              td= s.SessionID
-              td= s.UserRole
-              td= s.Status
-        else
-          tr
-            td(colspan="3") No sessions found
+    hr
 
-    h3 Reviews
-    table
-      thead
-        tr
-          th Rating
-          th Comment
-      tbody
-        if reviews && reviews.length
-          each r in reviews
-            tr
-              td= r.Star_Rating
-              td= r.Comment
-        else
+    h2 Availability
+    if availability && availability.length > 0
+      table(border="1")
+        thead
           tr
-            td(colspan="2") No reviews found
-  else
-    p User not found.
+            th Day
+            th Start Time
+            th End Time
+            th Time Zone
+        tbody
+          each slot in availability
+            tr
+              td= slot.dayOfWeek || "N/A"
+              td= slot.startTime || "N/A"
+              td= slot.endTime || "N/A"
+              td= slot.timeZone || "N/A"
+    else
+      p No availability data found.
+
+    hr
+
+    h2 Interests
+    if interests && interests.length > 0
+      ul
+        each interest in interests
+          li= interest.interestName || "N/A"
+    else
+      p No interests found.
+
+    hr
+
+    h2 Preferences
+    if preferences
+      p
+        strong Practice Method:
+        |  #{preferences.practiceMethod || "N/A"}
+      p
+        strong Preferred Session Type:
+        |  #{preferences.preferredSessionType || "N/A"}
+      p
+        strong Learning Goal:
+        |  #{preferences.learningGoal || "N/A"}
+    else
+      p No preferences found.
+
+    hr
+
+    // Logout button to update Last_Active in DB immediately
+    if user && user.id
+      form(method="get", action="/logout")
+        input(type="hidden", name="userId", value=user.id)
+        button(type="submit") Logout (sets Last Active)
+
+    hr
+
+    a(href="/users") Back to Users List

@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  h2 Search Results
+
+  form(action="/search", method="GET")
+    input(type="text", name="language", value=query, placeholder="Search by language...")
+    button(type="submit") Search
+
+  if query
+    if users.length === 0
+      p No users found for "#{query}".
+    else
+      p Showing #{users.length} result(s) for "#{query}"
+      table
+        thead
+          tr
+            th Name
+            th Username
+            th Role
+            th Language
+            th Type
+            th Proficiency
+        tbody
+          each user in users
+            tr
+              td
+                a(href=`/users/${user.UserID}`)= user.Full_Name
+              td= user.Username
+              td= user.Role
+              td= user.Language_Name
+              td= user.Language_Type
+              td= user.Proficiency_Level || 'N/A'
+  else
+    p Enter a language name to find users.

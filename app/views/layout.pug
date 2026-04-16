@@ -1,5 +1,21 @@
-html 
-    head    
-        title Title here...
-    body 
-        block content
+html
+  head
+    title= title
+  body
+    if !hideNav
+      header
+        nav
+          a(href="/") Home
+          a(href="/users") Users
+          a(href="/languages") Languages
+          a(href="/categories") Categories
+          a(href="/platform") About
+          if currentUser && currentUser.role === 'Admin'
+            a(href="/admin") Admin
+          if currentUser
+            a(href="/logout") Logout
+          else
+            a(href="/login") Login
+            a(href="/signup") Sign Up
+
+    block content

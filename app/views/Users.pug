@@ -3,7 +3,7 @@ extends layout
 block content
   h2 Users
 
-  table
+  table(border="1" cellpadding="10" cellspacing="0")
     thead
       tr
         th User ID
@@ -15,9 +15,9 @@ block content
     tbody
       each user in users
         tr
-          td= user.UserID
-          td= user.Full_Name
-          td= user.Email
-          td= user.Role
-          td= user.Bio
-          td= user.Average_Rating
+          td= user.id
+          td: a(href="/users/" + user.id)= user.name
+          td= user.email
+          td= user.programme
+          td= user.bio
+          td= Number(user.averageRating).toFixed(2)
