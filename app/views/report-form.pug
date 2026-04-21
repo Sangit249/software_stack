@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  h2 Report #{reportedUser.name}
+
+  if error
+    p(style='color: red;') #{error}
+
+  form(action='/reports/submit' method='POST')
+    input(type='hidden' name='reportedUserId' value=reportedUser.id)
+
+    p
+      label Reason for report
+      br
+      textarea(
+        name='reason'
+        rows='5'
+        cols='40'
+        placeholder='Describe why you are reporting this user...'
+        required
+      )
+
+    p
+      button(type='submit') Submit Report
+
+  hr
+  a(href=`/users/${reportedUser.id}`) Back to #{reportedUser.name}'s Profile

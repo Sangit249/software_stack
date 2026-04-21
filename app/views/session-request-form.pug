@@ -1,0 +1,51 @@
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Request a Session
+
+  body
+    h1 Request a Session with #{teacher.name}
+
+    if error
+      p(style="color: red;") #{error}
+
+    form(action="/sessions/request" method="POST")
+      input(type="hidden" name="teacherId" value=teacher.id)
+
+      p
+        label Meeting Place
+        br
+        input(
+          type="text"
+          name="meeting_place"
+          placeholder="e.g. Google Meet, Zoom, In person"
+          required
+        )
+
+      p
+        label Scheduled Time
+        br
+        input(
+          type="datetime-local"
+          name="scheduled_time"
+          required
+        )
+
+      p
+        label Initial Message (optional)
+        br
+        textarea(
+          name="initial_message"
+          placeholder="What do you want to work on? e.g. Help with Spanish grammar"
+          rows="4"
+          cols="40"
+        )
+
+      p
+        button(type="submit") Send Request
+
+    hr
+
+    a(href=`/users/${teacher.id}`) Back to #{teacher.name}'s Profile

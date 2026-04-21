@@ -10,116 +10,136 @@ html
 
     if user
       h2 Basic Information
+
       p
         strong User ID:
-        |  #{user.id}
+        | #{user.id}
+
       p
         strong Full Name:
-        |  #{user.name}
+        | #{user.name}
+
       p
         strong Username:
-        |  #{user.username}
+        | #{user.username}
+
       p
         strong Email:
-        |  #{user.email}
+        | #{user.email}
+
       p
         strong Country:
-        |  #{user.country}
+        | #{user.country}
+
       p
         strong Role:
-        |  #{user.programme}
+        | #{user.programme}
+
       p
         strong Bio:
-        |  #{user.bio}
+        | #{user.bio}
+
       p
         strong Profile Image:
-        |  #{user.profileImage}
+        | #{user.profileImage}
+
       p
         strong Average Rating:
-        |  #{user.averageRating}
+        | #{user.averageRating}
+
       p
         strong Joined Date:
-        |  #{user.joinedDate}
+        | #{user.joinedDate}
+
       p
         strong Last Active:
-        |  #{user.lastActive}
+        | #{user.lastActive}
+
+      if reported
+        p(style="color: green;") Your report has been submitted successfully.
+
+      if currentUser && currentUser.id != user.id
+        a(href=`/sessions/request/${user.id}`)
+          button Request a Session with #{user.name}
+        |  
+        a(href=`/reports/submit/${user.id}`)
+          button(style="color: red;") Report this User
+
+      hr
+
+      h2 Languages
+      if languages && languages.length > 0
+        table(border="1")
+          thead
+            tr
+              th Language
+              th Language Type
+              th Proficiency Level
+          tbody
+            each language in languages
+              tr
+                td= language.languageName || "N/A"
+                td= language.languageType || "N/A"
+                td= language.proficiencyLevel || "N/A"
+      else
+        p No languages found.
+
+      hr
+
+      h2 Availability
+      if availability && availability.length > 0
+        table(border="1")
+          thead
+            tr
+              th Day
+              th Start Time
+              th End Time
+              th Time Zone
+          tbody
+            each slot in availability
+              tr
+                td= slot.dayOfWeek || "N/A"
+                td= slot.startTime || "N/A"
+                td= slot.endTime || "N/A"
+                td= slot.timeZone || "N/A"
+      else
+        p No availability data found.
+
+      hr
+
+      h2 Interests
+      if interests && interests.length > 0
+        ul
+          each interest in interests
+            li= interest.interestName || "N/A"
+      else
+        p No interests found.
+
+      hr
+
+      h2 Preferences
+      if preferences
+        p
+          strong Practice Method:
+          | #{preferences.practiceMethod || "N/A"}
+        p
+          strong Preferred Session Type:
+          | #{preferences.preferredSessionType || "N/A"}
+        p
+          strong Learning Goal:
+          | #{preferences.learningGoal || "N/A"}
+      else
+        p No preferences found.
+
+      hr
+
+      if currentUser && currentUser.id == user.id
+        form(method="get", action="/logout")
+          input(type="hidden", name="userId", value=user.id)
+          button(type="submit") Logout (sets Last Active)
+
     else
       p No user data found.
 
     hr
-
-    h2 Languages
-    if languages && languages.length > 0
-      table(border="1")
-        thead
-          tr
-            th Language
-            th Language Type
-            th Proficiency Level
-        tbody
-          each language in languages
-            tr
-              td= language.languageName || "N/A"
-              td= language.languageType || "N/A"
-              td= language.proficiencyLevel || "N/A"
-    else
-      p No languages found.
-
-    hr
-
-    h2 Availability
-    if availability && availability.length > 0
-      table(border="1")
-        thead
-          tr
-            th Day
-            th Start Time
-            th End Time
-            th Time Zone
-        tbody
-          each slot in availability
-            tr
-              td= slot.dayOfWeek || "N/A"
-              td= slot.startTime || "N/A"
-              td= slot.endTime || "N/A"
-              td= slot.timeZone || "N/A"
-    else
-      p No availability data found.
-
-    hr
-
-    h2 Interests
-    if interests && interests.length > 0
-      ul
-        each interest in interests
-          li= interest.interestName || "N/A"
-    else
-      p No interests found.
-
-    hr
-
-    h2 Preferences
-    if preferences
-      p
-        strong Practice Method:
-        |  #{preferences.practiceMethod || "N/A"}
-      p
-        strong Preferred Session Type:
-        |  #{preferences.preferredSessionType || "N/A"}
-      p
-        strong Learning Goal:
-        |  #{preferences.learningGoal || "N/A"}
-    else
-      p No preferences found.
-
-    hr
-
-    // Logout button to update Last_Active in DB immediately
-    if user && user.id
-      form(method="get", action="/logout")
-        input(type="hidden", name="userId", value=user.id)
-        button(type="submit") Logout (sets Last Active)
-
-    hr
-
     a(href="/users") Back to Users List

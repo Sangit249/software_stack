@@ -1,0 +1,60 @@
+extends layout
+
+block content
+  h2 My Sessions
+
+  if sessions.length === 0
+    p You have no sessions yet.
+
+  else
+    each s in sessions
+      div(style='border: 1px solid #ccc; padding: 16px; margin-bottom: 16px; border-radius: 8px;')
+
+        p
+          strong Status: 
+          span= s.Status
+
+        p
+          strong Learner: 
+          span= s.LearnerName
+
+        p
+          strong Teacher: 
+          span= s.TeacherName
+
+        p
+          strong Meeting place: 
+          span= s.Meeting_Place
+
+        p
+          strong Scheduled time: 
+          span= s.Scheduled_Time
+
+        if s.Initial_Message
+          p
+            strong Message: 
+            span= s.Initial_Message
+
+        if s.Status === 'Pending'
+
+          if String(user.id) == String(s.TeacherID)
+            p
+              form(action=`/sessions/${s.SessionID}/accept` method='POST' style='display:inline')
+                button(type='submit') Accept
+              |  
+              form(action=`/sessions/${s.SessionID}/decline` method='POST' style='display:inline')
+                button(type='submit') Decline
+
+          if String(user.id) == String(s.LearnerID)
+            p
+              form(action=`/sessions/${s.SessionID}/cancel` method='POST' style='display:inline')
+                button(type='submit') Cancel Request
+
+        if s.Status === 'Accepted'
+          p(style='color: green;') Session confirmed!
+
+        if s.Status === 'Declined'
+          p(style='color: red;') This request was declined.
+
+        if s.Status === 'Cancelled'
+          p(style='color: grey;') You cancelled this request.

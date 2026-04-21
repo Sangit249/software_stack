@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 // Import express.js
 const express = require("express");
 
@@ -15,13 +17,13 @@ app.use(express.static("static"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Add session support so we can render logout link correctly after login
+// Add session support
 const session = require('express-session');
 app.use(session({
-    secret: 'your-super-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 }
+    cookie: { maxAge: 24 * 60 * 60 * 1000, httpOnly: true }
 }));
 
 // Provide current user in templates
@@ -32,7 +34,6 @@ app.use((req, res, next) => {
 
 // ==============================
 // ADMIN MIDDLEWARE
-// Blocks non-admin users from accessing admin routes
 // ==============================
 function requireAdmin(req, res, next) {
     if (!req.session.user || req.session.user.role !== 'Admin') {
@@ -41,14 +42,22 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+// ==============================
+// LOGIN MIDDLEWARE
+// ==============================
+function requireLogin(req, res, next) {
+    if (!req.session.user) return res.redirect("/login");
+    next();
+}
+
 // Get the functions in the db.js file to use
 const db = require('./services/db');
 
 // Use bcrypt for password hashing and verification
 const bcrypt = require('bcrypt');
-const SALT_ROUNDS = 10; // cost factor for bcrypt hashing
+const SALT_ROUNDS = 10;
 
-// Import model classes for various database entities
+// Import model classes
 const { User } = require('./models/userModel');
 const { Category } = require('./models/categoryModel');
 const { Report } = require('./models/reportModel');
@@ -60,14 +69,9 @@ app.get("/", function(req, res) {
     res.render("home", { title: "Home" });
 });
 
-
 // ==============================
 // ADMIN ROUTES
-// All protected by requireAdmin middleware
-// Only users with Role = 'Admin' can access these
 // ==============================
-
-// Admin dashboard — shows platform stats
 app.get("/admin", requireAdmin, async function(req, res) {
     try {
         const stats = await Admin.getStats();
@@ -78,7 +82,6 @@ app.get("/admin", requireAdmin, async function(req, res) {
     }
 });
 
-// Admin users — list all users with role and delete controls
 app.get("/admin/users", requireAdmin, async function(req, res) {
     try {
         const users = await Admin.getAllUsers();
@@ -89,7 +92,6 @@ app.get("/admin/users", requireAdmin, async function(req, res) {
     }
 });
 
-// Admin — delete a user and all their data
 app.post("/admin/users/:id/delete", requireAdmin, async function(req, res) {
     try {
         await Admin.deleteUser(req.params.id);
@@ -100,7 +102,6 @@ app.post("/admin/users/:id/delete", requireAdmin, async function(req, res) {
     }
 });
 
-// Admin — change a user's role
 app.post("/admin/users/:id/role", requireAdmin, async function(req, res) {
     try {
         const allowedRoles = ["Learner", "Teacher", "Admin"];
@@ -115,7 +116,6 @@ app.post("/admin/users/:id/role", requireAdmin, async function(req, res) {
     }
 });
 
-// Admin reports — view all reports with user details
 app.get("/admin/reports", requireAdmin, async function(req, res) {
     try {
         const reports = await Admin.getAllReports();
@@ -127,10 +127,8 @@ app.get("/admin/reports", requireAdmin, async function(req, res) {
 });
 
 // ==============================
-// AUTH ROUTES (Login + Signup + Logout)
+// AUTH ROUTES
 // ==============================
-
-// GET /login - display the login page
 app.get("/login", function(req, res) {
     res.render("login", { title: "Login", error: null, emailOrUsername: "", hideNav: true });
 });
@@ -178,16 +176,14 @@ app.post("/login", async function(req, res) {
             });
         }
 
-        // Successful login: update last active timestamp in Users table
         const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
         await db.query(updateLastActiveSql, [user.UserID]);
 
-        // Save user identity and role in session
         req.session.user = {
             id: user.UserID,
             name: user.Full_Name,
             email: user.Email,
-            role: user.Role  // needed for admin checks
+            role: user.Role
         };
 
         return res.redirect("/");
@@ -229,7 +225,6 @@ app.post("/signup", async function(req, res) {
             });
         }
 
-        // Prevent duplicate accounts by email or username
         const existingSql = "SELECT UserID FROM Users WHERE Email = ? OR Username = ? LIMIT 1";
         const existing = await db.query(existingSql, [form.email, form.username]);
 
@@ -246,12 +241,11 @@ app.post("/signup", async function(req, res) {
             throw new Error("User creation failed");
         }
 
-        // Auto-login after signup and store role in session
         req.session.user = {
             id: result.insertId,
             name: form.fullName,
             email: form.email,
-            role: form.role  // needed for admin checks
+            role: form.role
         };
         return res.redirect("/complete-profile");
     } catch (err) {
@@ -261,11 +255,9 @@ app.post("/signup", async function(req, res) {
 });
 
 // ==============================
-// USERS ROUTE
-// URL: /users
-// PUG: users.pug
+// USERS ROUTE — protected
 // ==============================
-app.get("/users", async function(req, res) {
+app.get("/users", requireLogin, async function(req, res) {
     try {
         const users = await User.getAllUsers();
         res.render("users", { title: "Users", users: users });
@@ -277,8 +269,6 @@ app.get("/users", async function(req, res) {
 
 // ==============================
 // LANGUAGES ROUTE
-// URL: /languages
-// PUG: languages.pug
 // ==============================
 app.get("/languages", function(req, res) {
     var sql = `SELECT LanguageID, Language_Name FROM Languages`;
@@ -291,11 +281,9 @@ app.get("/languages", function(req, res) {
 });
 
 // ==============================
-// USER LANGUAGES ROUTE
-// URL: /user-languages
-// PUG: user_languages.pug
+// USER LANGUAGES ROUTE — protected
 // ==============================
-app.get("/user-languages", function(req, res) {
+app.get("/user-languages", requireLogin, function(req, res) {
     var sql = `
         SELECT 
             ul.UserID,
@@ -315,38 +303,145 @@ app.get("/user-languages", function(req, res) {
 });
 
 // ==============================
-// SESSIONS ROUTE
-// URL: /sessions
-// PUG: sessions.pug
+// SESSION REQUEST ROUTES
 // ==============================
-app.get("/sessions", function(req, res) {
-    var sql = `
-        SELECT 
-            ls.SessionID,
-            ls.LearnerID,
-            learner.Full_Name AS LearnerName,
-            ls.TeacherID,
-            teacher.Full_Name AS TeacherName,
-            ls.Meeting_Place,
-            ls.Scheduled_Time,
-            ls.Initial_Message,
-            ls.Status
-        FROM Learning_Sessions ls
-        JOIN Users learner ON ls.LearnerID = learner.UserID
-        JOIN Users teacher ON ls.TeacherID = teacher.UserID
-    `;
-    db.query(sql).then(results => {
-        res.render("sessions", { title: "Learning Sessions", sessions: results });
-    }).catch(err => {
+app.get("/sessions/request/:teacherId", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+    try {
+        const teacher = await User.getUserById(req.params.teacherId);
+        if (!teacher) return res.status(404).send("Teacher not found.");
+        res.render("session-request-form", { title: "Request a Session", teacher });
+    } catch (err) {
         console.error(err);
-        res.status(500).send("Error loading sessions");
-    });
+        res.status(500).send("Error loading request form.");
+    }
+});
+
+app.post("/sessions/request", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+
+    const learnerId = req.session.user.id;
+    const { teacherId, meeting_place, scheduled_time, initial_message } = req.body;
+
+    if (!teacherId || !meeting_place || !scheduled_time) {
+        return res.status(400).send("Please fill in all required fields.");
+    }
+
+    if (String(learnerId) === String(teacherId)) {
+        return res.status(400).send("You cannot send a session request to yourself.");
+    }
+
+    try {
+        await db.query(
+            `INSERT INTO Learning_Sessions (LearnerID, TeacherID, Meeting_Place, Scheduled_Time, Initial_Message, Status)
+             VALUES (?, ?, ?, ?, ?, 'Pending')`,
+            [learnerId, teacherId, meeting_place, scheduled_time, initial_message || null]
+        );
+        return res.redirect("/sessions/my");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error sending session request.");
+    }
+});
+
+app.get("/sessions/my", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+
+    const userId = req.session.user.id;
+    try {
+        const sessions = await db.query(
+            `SELECT 
+                ls.SessionID,
+                ls.LearnerID,
+                learner.Full_Name AS LearnerName,
+                ls.TeacherID,
+                teacher.Full_Name AS TeacherName,
+                ls.Meeting_Place,
+                ls.Scheduled_Time,
+                ls.Initial_Message,
+                ls.Status
+             FROM Learning_Sessions ls
+             JOIN Users learner ON ls.LearnerID = learner.UserID
+             JOIN Users teacher ON ls.TeacherID = teacher.UserID
+             WHERE ls.LearnerID = ? OR ls.TeacherID = ?
+             ORDER BY ls.Scheduled_Time DESC`,
+            [userId, userId]
+        );
+        res.render("sessions-my", { title: "My Sessions", sessions, user: req.session.user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading your sessions.");
+    }
+});
+
+app.post("/sessions/:id/accept", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+    const userId = req.session.user.id;
+    const sessionId = req.params.id;
+    try {
+        const rows = await db.query("SELECT * FROM Learning_Sessions WHERE SessionID = ?", [sessionId]);
+        if (!rows || rows.length === 0) return res.status(404).send("Session not found.");
+        const session = rows[0];
+        if (String(session.TeacherID) !== String(userId)) {
+            return res.status(403).send("Only the teacher can accept this request.");
+        }
+        if (session.Status !== "Pending") {
+            return res.status(400).send("This session is no longer pending.");
+        }
+        await db.query("UPDATE Learning_Sessions SET Status = 'Accepted' WHERE SessionID = ?", [sessionId]);
+        return res.redirect("/sessions/my");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error accepting session.");
+    }
+});
+
+app.post("/sessions/:id/decline", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+    const userId = req.session.user.id;
+    const sessionId = req.params.id;
+    try {
+        const rows = await db.query("SELECT * FROM Learning_Sessions WHERE SessionID = ?", [sessionId]);
+        if (!rows || rows.length === 0) return res.status(404).send("Session not found.");
+        const session = rows[0];
+        if (String(session.TeacherID) !== String(userId)) {
+            return res.status(403).send("Only the teacher can decline this request.");
+        }
+        if (session.Status !== "Pending") {
+            return res.status(400).send("This session is no longer pending.");
+        }
+        await db.query("UPDATE Learning_Sessions SET Status = 'Declined' WHERE SessionID = ?", [sessionId]);
+        return res.redirect("/sessions/my");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error declining session.");
+    }
+});
+
+app.post("/sessions/:id/cancel", async function(req, res) {
+    if (!req.session.user) return res.redirect("/login");
+    const userId = req.session.user.id;
+    const sessionId = req.params.id;
+    try {
+        const rows = await db.query("SELECT * FROM Learning_Sessions WHERE SessionID = ?", [sessionId]);
+        if (!rows || rows.length === 0) return res.status(404).send("Session not found.");
+        const session = rows[0];
+        if (String(session.LearnerID) !== String(userId)) {
+            return res.status(403).send("Only the learner can cancel this request.");
+        }
+        if (session.Status !== "Pending") {
+            return res.status(400).send("Only pending sessions can be cancelled.");
+        }
+        await db.query("UPDATE Learning_Sessions SET Status = 'Cancelled' WHERE SessionID = ?", [sessionId]);
+        return res.redirect("/sessions/my");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error cancelling session.");
+    }
 });
 
 // ==============================
 // REVIEWS ROUTE
-// URL: /reviews
-// PUG: reviews.pug
 // ==============================
 app.get("/reviews", async function(req, res) {
     try {
@@ -359,11 +454,9 @@ app.get("/reviews", async function(req, res) {
 });
 
 // ==============================
-// REPORTS ROUTE
-// URL: /reports
-// PUG: reports.pug
+// REPORTS ROUTE — protected
 // ==============================
-app.get("/reports", async function(req, res) {
+app.get("/reports", requireLogin, async function(req, res) {
     try {
         const reports = await Report.getAllReports();
         res.render("reports", { title: "Reports", reports: reports });
@@ -372,11 +465,49 @@ app.get("/reports", async function(req, res) {
         res.status(500).send("Error loading reports");
     }
 });
+// GET /reports/submit/:userId — show report form
+app.get("/reports/submit/:userId", requireLogin, async function(req, res) {
+    try {
+        const reportedUser = await User.getUserById(req.params.userId);
+        if (!reportedUser) return res.status(404).send("User not found.");
+        if (String(req.session.user.id) === String(req.params.userId)) {
+            return res.status(400).send("You cannot report yourself.");
+        }
+        res.render("report-form", { title: "Submit a Report", reportedUser, error: null });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading report form.");
+    }
+});
+
+// POST /reports/submit — save report to database
+app.post("/reports/submit", requireLogin, async function(req, res) {
+    const reporterId = req.session.user.id;
+    const { reportedUserId, reason } = req.body;
+
+    if (!reportedUserId || !reason || !reason.trim()) {
+        return res.status(400).send("Please provide a reason for the report.");
+    }
+
+    if (String(reporterId) === String(reportedUserId)) {
+        return res.status(400).send("You cannot report yourself.");
+    }
+
+    try {
+        await db.query(
+            `INSERT INTO Reports (ReporterID, ReportedUserID, Reason, Status)
+             VALUES (?, ?, ?, 'Pending')`,
+            [reporterId, reportedUserId, reason.trim()]
+        );
+        return res.redirect("/users/" + reportedUserId + "?reported=true");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error submitting report.");
+    }
+});
 
 // ==============================
 // PLATFORM OVERVIEW ROUTE
-// URL: /platform
-// PUG: platform.pug
 // ==============================
 app.get("/platform", function(req, res) {
     res.render("platform", {
@@ -396,23 +527,19 @@ app.get("/platform", function(req, res) {
 
 // ==============================
 // USER PROFILE ROUTE
-// URL: /users/:id
-// PUG: profile.pug
 // ==============================
 app.get("/users/:id", async (req, res) => {
     const userId = req.params.id;
     try {
         const user = await User.getUserById(userId);
         if (!user) return res.status(404).send("User not found");
-
         const [languages, availability, interests, preferences] = await Promise.all([
             User.getUserLanguages(userId),
             User.getUserAvailability(userId),
             User.getUserInterests(userId),
             User.getUserPreferences(userId)
         ]);
-
-        res.render("profile", { title: "User Profile", user, languages, availability, interests, preferences });
+        res.render("profile", { title: "User Profile", user, languages, availability, interests, preferences, reported: req.query.reported || false });
     } catch (error) {
         console.error("PROFILE ROUTE ERROR:", error);
         res.status(500).send("Error loading profile");
@@ -421,8 +548,6 @@ app.get("/users/:id", async (req, res) => {
 
 // ==============================
 // CATEGORIES ROUTE
-// URL: /categories
-// PUG: categories.pug
 // ==============================
 app.get("/categories", async (req, res) => {
     try {
@@ -450,8 +575,6 @@ app.get("/categories", async (req, res) => {
 
 // ==============================
 // SEARCH ROUTE
-// URL: /search
-// PUG: search.pug
 // ==============================
 app.get("/search", async function(req, res) {
     const language = (req.query.language || "").trim();
@@ -466,8 +589,6 @@ app.get("/search", async function(req, res) {
 
 // ==============================
 // COMPLETE PROFILE ROUTE
-// URL: /complete-profile
-// PUG: complete-profile.pug
 // ==============================
 app.get("/complete-profile", async function(req, res) {
     if (!req.session.user) return res.redirect("/login");
@@ -521,21 +642,8 @@ app.post("/complete-profile", async function(req, res) {
 });
 
 // ==============================
-// LOGOUT ROUTES
+// LOGOUT ROUTE
 // ==============================
-app.post("/logout", async function(req, res) {
-    try {
-        const userId = req.body.userId;
-        if (!userId) return res.status(400).send("userId is required");
-        const updateLastActiveSql = "UPDATE Users SET Last_Active = NOW() WHERE UserID = ?";
-        await db.query(updateLastActiveSql, [userId]);
-        return res.redirect("/");
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Logout failed");
-    }
-});
-
 app.get("/logout", async function(req, res) {
     try {
         if (!req.session.user) return res.redirect('/login');
@@ -550,61 +658,6 @@ app.get("/logout", async function(req, res) {
         console.error(err);
         res.status(500).send("Logout failed");
     }
-});
-
-// ==============================
-// LEGACY/TEST ROUTES (from coursework)
-// ==============================
-app.get("/students", function(req, res) {
-    db.query('select * from Students').then(results => {
-        res.render('all-students', { data: results });
-    }).catch(err => { console.error(err); res.status(500).send("Error loading students"); });
-});
-
-app.get("/student-single/:id", function(req, res) {
-    db.query("SELECT * FROM Students WHERE id = ?", [req.params.id]).then(results => {
-        res.render("student-single", { "student": results[0] });
-    }).catch(err => { console.error(err); res.status(500).send("Error loading student"); });
-});
-
-app.get("/db_test", function(req, res) {
-    db.query('select * from test_table').then(results => {
-        console.log(results); res.send(results);
-    }).catch(err => { console.error(err); res.status(500).send("Database error"); });
-});
-
-app.get("/db_test/:id", function(req, res) {
-    db.query("SELECT name FROM test_table WHERE id = ?", [req.params.id]).then(result => {
-        if (result.length > 0) {
-            res.send(`<div><h2>User found!</h2><p>ID: ${req.params.id}</p><p>Name: ${result[0].name}</p></div>`);
-        } else {
-            res.send(`<h1>User not found with Id: ${req.params.id}</h1>`);
-        }
-    }).catch(err => { console.error(err); res.status(500).send("Database error"); });
-});
-
-app.get("/programmes", function(req, res) {
-    db.query('select * from Programme').then(results => {
-        let output = '<table border="1px">';
-        for (var row of results) {
-            output += `<tr><td>${row.programme_id}</td><td><a href='/programmes/${row.programme_id}'>${row.programme_name}</a></td></tr>`;
-        }
-        output += '</table>';
-        res.send(output);
-    }).catch(err => { console.error(err); res.status(500).send("Error loading programmes"); });
-});
-
-app.get("/allstudents", function(req, res) {
-    db.query('select * from students').then(results => {
-        res.json(results);
-    }).catch(err => { console.error(err); res.status(500).send("Error loading all students"); });
-});
-
-app.get("/goodbye", function(req, res) { res.send("Goodbye world!"); });
-app.get("/roehampton", function(req, res) { res.send(req.url.substring(0, 4)); });
-app.get("/hello/:name", function(req, res) { res.send("Hello " + req.params.name); });
-app.get("/student/:name/:id", function(req, res) {
-    res.send(`<table border="1"><tr><th>Name</th><th>Id</th></tr><tr><td>${req.params.name}</td><td>${req.params.id}</td></tr></table>`);
 });
 
 // Start server on port 3000

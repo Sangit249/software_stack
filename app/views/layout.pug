@@ -1,3 +1,4 @@
+doctype html
 html
   head
     title= title
@@ -10,6 +11,8 @@ html
           a(href="/languages") Languages
           a(href="/categories") Categories
           a(href="/platform") About
+          if currentUser
+            a(href="/sessions/my") My Sessions
           if currentUser && currentUser.role === 'Admin'
             a(href="/admin") Admin
           if currentUser
