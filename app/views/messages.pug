@@ -1,0 +1,18 @@
+extends layout
+
+block content
+  h2 My Messages
+
+  if conversations.length === 0
+    p You have no conversations yet. Accept a session request to start messaging.
+  else
+    each c in conversations
+      div(style='border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; border-radius: 8px;')
+        p
+          strong Conversation with: 
+          span= String(user.id) == String(c.TeacherID) ? c.LearnerName : c.TeacherName
+        if c.UnreadCount > 0
+          p(style='color: red;')
+            strong #{c.UnreadCount} unread message(s)
+        a(href=`/messages/${c.SessionID}`)
+          button Open Conversation

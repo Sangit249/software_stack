@@ -12,6 +12,9 @@ html
           a(href="/categories") Categories
           a(href="/platform") About
           if currentUser
+            a(href="/dashboard") Dashboard
+            a(href="/sessions/my") My Sessions
+          if currentUser
             a(href="/sessions/my") My Sessions
           if currentUser && currentUser.role === 'Admin'
             a(href="/admin") Admin

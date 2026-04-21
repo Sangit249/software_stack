@@ -1,0 +1,49 @@
+extends layout
+
+block content
+  h2 Leave a Review
+
+  p
+    strong Session with: 
+    span= session.TeacherName
+
+  p
+    strong Meeting place: 
+    span= session.Meeting_Place
+
+  p
+    strong Date: 
+    span= session.Scheduled_Time
+
+  if error
+    p(style='color: red;') #{error}
+
+  form(action='/reviews/submit' method='POST')
+    input(type='hidden' name='sessionId' value=session.SessionID)
+
+    p
+      label Star Rating (1-5)
+      br
+      select(name='star_rating' required)
+        option(value='') Select a rating
+        option(value='5') 5 - Excellent
+        option(value='4') 4 - Good
+        option(value='3') 3 - Average
+        option(value='2') 2 - Poor
+        option(value='1') 1 - Very Poor
+
+    p
+      label Comment (optional)
+      br
+      textarea(
+        name='comment'
+        rows='5'
+        cols='40'
+        placeholder='Share your experience...'
+      )
+
+    p
+      button(type='submit') Submit Review
+
+  hr
+  a(href='/sessions/my') Back to My Sessions

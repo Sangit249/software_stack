@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  h2 Conversation with #{String(user.id) == String(session.TeacherID) ? session.LearnerName : session.TeacherName}
+
+  div(style='border: 1px solid #ccc; padding: 16px; border-radius: 8px; max-height: 400px; overflow-y: auto; margin-bottom: 16px;')
+    if messages.length === 0
+      p No messages yet. Say hello!
+    else
+      each m in messages
+        div(style=`margin-bottom: 12px; text-align: ${String(m.SenderID) === String(user.id) ? 'right' : 'left'};`)
+          div(style=`display: inline-block; padding: 8px 12px; border-radius: 8px; background: ${String(m.SenderID) === String(user.id) ? '#d1f0d1' : '#f0f0f0'};`)
+            p(style='margin: 0; font-weight: bold; font-size: 12px;')= m.SenderName
+            p(style='margin: 4px 0 0;')= m.Content
+            p(style='margin: 4px 0 0; font-size: 11px; color: grey;')= m.Sent_At
+
+  form(action=`/messages/${session.SessionID}` method='POST')
+    textarea(
+      name='content'
+      rows='3'
+      cols='50'
+      placeholder='Type your message...'
+      required
+    )
+    br
+    button(type='submit') Send Message
+
+  hr
+  a(href='/messages') Back to Messages

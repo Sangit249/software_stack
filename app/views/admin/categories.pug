@@ -1,0 +1,32 @@
+extends ../layout
+
+block content
+  h2 Manage Categories
+  a(href="/admin") Back to Dashboard
+
+  h3 Add New Category
+  form(action="/admin/categories/add" method="POST")
+    input(type="text" name="category_name" placeholder="Category name" required)
+    input(type="text" name="description" placeholder="Description (optional)")
+    button(type="submit") Add Category
+
+  h3 All Categories
+  if categories.length === 0
+    p No categories found.
+  else
+    table
+      thead
+        tr
+          th ID
+          th Name
+          th Description
+          th Actions
+      tbody
+        each cat in categories
+          tr
+            td= cat.CategoryID
+            td= cat.Category_Name
+            td= cat.Description || '-'
+            td
+              form(action="/admin/categories/" + cat.CategoryID + "/delete" method="POST")
+                button(type="submit" onclick="return confirm('Delete this category?')") Delete

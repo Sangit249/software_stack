@@ -1,0 +1,118 @@
+extends layout
+
+block content
+  h2 Welcome back, #{user.name}!
+
+  hr
+
+  h3 Your Stats
+  table(border="1" cellpadding="8")
+    thead
+      tr
+        th Total Sessions
+        th Accepted Sessions
+        th Pending Requests
+        th Reviews Received
+    tbody
+      tr
+        td= stats.totalSessions
+        td= stats.acceptedSessions
+        td= stats.pendingCount
+        td= stats.reviewCount
+
+  hr
+
+  h3 Your Profile
+  p
+    strong Name: 
+    span= user.name
+  p
+    strong Email: 
+    span= user.email
+  p
+    strong Role: 
+    span= user.programme
+  p
+    strong Bio: 
+    span= user.bio || "No bio yet."
+
+  if languages && languages.length > 0
+    h4 Your Languages
+    ul
+      each lang in languages
+        li #{lang.languageName} — #{lang.languageType} (#{lang.proficiencyLevel})
+  else
+    p No languages added yet.
+
+  a(href=`/users/${user.id}`) View Full Profile
+
+  hr
+
+  h3 Pending Requests
+  if pending.length === 0
+    p No pending requests.
+  else
+    each s in pending
+      div(style='border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; border-radius: 8px;')
+        p
+          strong With: 
+          span= String(user.id) == String(s.TeacherID) ? s.LearnerName : s.TeacherName
+        p
+          strong Meeting place: 
+          span= s.Meeting_Place
+        p
+          strong Time: 
+          span= s.Scheduled_Time
+        if String(user.id) == String(s.TeacherID)
+          form(action=`/sessions/${s.SessionID}/accept` method='POST' style='display:inline')
+            button(type='submit') Accept
+          |  
+          form(action=`/sessions/${s.SessionID}/decline` method='POST' style='display:inline')
+            button(type='submit') Decline
+        else
+          form(action=`/sessions/${s.SessionID}/cancel` method='POST' style='display:inline')
+            button(type='submit') Cancel Request
+
+  hr
+
+  h3 Upcoming Sessions
+  if upcoming.length === 0
+    p No upcoming sessions.
+  else
+    each s in upcoming
+      div(style='border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; border-radius: 8px;')
+        p
+          strong With: 
+          span= String(user.id) == String(s.TeacherID) ? s.LearnerName : s.TeacherName
+        p
+          strong Meeting place: 
+          span= s.Meeting_Place
+        p
+          strong Time: 
+          span= s.Scheduled_Time
+        if String(user.id) == String(s.LearnerID)
+          a(href=`/reviews/submit/${s.SessionID}`)
+            button Leave a Review
+
+  hr
+
+  h3 Recent Reviews Received
+  if reviews.length === 0
+    p No reviews yet.
+  else
+    each r in reviews
+      div(style='border: 1px solid #ccc; padding: 12px; margin-bottom: 12px; border-radius: 8px;')
+        p
+          strong From: 
+          span= r.ReviewerName
+        p
+          strong Rating: 
+          span= r.Star_Rating
+          |  / 5
+        if r.Comment
+          p
+            strong Comment: 
+            span= r.Comment
+
+  hr
+  a(href='/sessions/my') View All Sessions

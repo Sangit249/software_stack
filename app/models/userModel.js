@@ -127,17 +127,22 @@ class User {
         return rows.length > 0 ? rows[0] : null;
     }
 
-    static async searchByLanguage(language) {
-        const sql = `
-            SELECT DISTINCT u.UserID, u.Full_Name, u.Username, u.Role,
-                ul.Language_Type, ul.Proficiency_Level, l.Language_Name
-            FROM Users u
-            JOIN User_Languages ul ON u.UserID = ul.UserID
-            JOIN Languages l ON ul.LanguageID = l.LanguageID
-            WHERE l.Language_Name LIKE ?
-        `;
-        return await db.query(sql, [`%${language}%`]);
-    }
+    static async search(query) {
+    const sql = `
+        SELECT DISTINCT u.UserID, u.Full_Name, u.Username, u.Role,
+            ul.Language_Type, ul.Proficiency_Level, l.Language_Name
+        FROM Users u
+        LEFT JOIN User_Languages ul ON u.UserID = ul.UserID
+        LEFT JOIN Languages l ON ul.LanguageID = l.LanguageID
+        LEFT JOIN Language_Categories lc ON l.LanguageID = lc.LanguageID
+        LEFT JOIN Categories c ON lc.CategoryID = c.CategoryID
+        WHERE l.Language_Name LIKE ?
+        OR u.Username LIKE ?
+        OR u.Full_Name LIKE ?
+        OR c.Category_Name LIKE ?
+    `;
+    return await db.query(sql, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
+}
 }
 
 module.exports = {

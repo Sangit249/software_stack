@@ -15,6 +15,7 @@ block content
           th Reported User
           th Reason
           th Status
+          th Actions
       tbody
         each report in reports
           tr
@@ -23,3 +24,11 @@ block content
             td= report.ReportedName
             td= report.Reason
             td= report.Status
+            td
+              if report.Status === 'Pending'
+                form(action="/admin/reports/" + report.ReportID + "/resolve" method="POST" style="display:inline")
+                  button(type="submit") Resolve
+                form(action="/admin/reports/" + report.ReportID + "/dismiss" method="POST" style="display:inline; margin-left: 0.5rem")
+                  button(type="submit") Dismiss
+              else
+                span= report.Status

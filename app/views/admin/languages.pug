@@ -1,0 +1,35 @@
+extends ../layout
+
+block content
+  h2 Manage Languages
+  a(href="/admin") Back to Dashboard
+
+  h3 Add New Language
+  if error
+    p(style="color: red;")= error
+  form(action="/admin/languages/add" method="POST")
+    input(type="text" name="language_name" placeholder="Language name" required)
+    select(name="category_id")
+      option(value="") -- No Category --
+      each cat in categories
+        option(value=cat.CategoryID)= cat.Category_Name
+    button(type="submit") Add Language
+
+  h3 All Languages
+  if languages.length === 0
+    p No languages found.
+  else
+    table
+      thead
+        tr
+          th ID
+          th Name
+          th Actions
+      tbody
+        each lang in languages
+          tr
+            td= lang.LanguageID
+            td= lang.Language_Name
+            td
+              form(action="/admin/languages/" + lang.LanguageID + "/delete" method="POST")
+                button(type="submit" onclick="return confirm('Delete this language? This will remove it from all user profiles.')") Delete

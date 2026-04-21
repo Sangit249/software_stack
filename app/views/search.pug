@@ -1,35 +1,69 @@
 extends layout
 
 block content
-  h2 Search Results
+  .search-page
+    h1 Search Users
 
-  form(action="/search", method="GET")
-    input(type="text", name="language", value=query, placeholder="Search by language...")
-    button(type="submit") Search
+    .search-box(style="position: relative; max-width: 500px; margin-bottom: 1rem;")
+      form(action="/search" method="GET")
+        input#searchInput(
+          type="text"
+          name="query"
+          value=query
+          placeholder="Search by username or language..."
+          autocomplete="off"
+          style="width: 100%; padding: 0.6rem; font-size: 1rem;"
+        )
+        button(type="submit") Search
 
-  if query
-    if users.length === 0
-      p No users found for "#{query}".
-    else
-      p Showing #{users.length} result(s) for "#{query}"
-      table
-        thead
-          tr
-            th Name
-            th Username
-            th Role
-            th Language
-            th Type
-            th Proficiency
-        tbody
-          each user in users
+    .category-suggestions(style="margin-bottom: 2rem;")
+      p Browse by category:
+      #categoryList(style="display: flex; flex-wrap: wrap; gap: 0.5rem;")
+
+    if query
+      if users.length === 0
+        p No users found for "#{query}"
+      else
+        p Found #{users.length} result(s) for "#{query}"
+        table(border="1" cellpadding="8")
+          thead
             tr
-              td
-                a(href=`/users/${user.UserID}`)= user.Full_Name
-              td= user.Username
-              td= user.Role
-              td= user.Language_Name
-              td= user.Language_Type
-              td= user.Proficiency_Level || 'N/A'
-  else
-    p Enter a language name to find users.
+              th Name
+              th Username
+              th Role
+              th Language
+              th Type
+              th Proficiency
+              th Profile
+          tbody
+            each user in users
+              tr
+                td= user.Full_Name
+                td= user.Username
+                td= user.Role
+                td= user.Language_Name || '-'
+                td= user.Language_Type || '-'
+                td= user.Proficiency_Level || '-'
+                td
+                  a(href="/users/" + user.UserID) View Profile
+    else
+      p Enter a username or language to search.
+
+  script.
+    async function loadCategories() {
+      const res = await fetch('/api/categories?q=');
+      const categories = await res.json();
+      const list = document.getElementById('categoryList');
+      categories.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.textContent = cat.Category_Name;
+        btn.style.padding = '0.4rem 0.8rem';
+        btn.style.cursor = 'pointer';
+        btn.addEventListener('click', function() {
+          document.getElementById('searchInput').value = cat.Category_Name;
+          document.querySelector('form').submit();
+        });
+        list.appendChild(btn);
+      });
+    }
+    loadCategories();

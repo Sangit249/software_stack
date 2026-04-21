@@ -1,6 +1,9 @@
 extends layout
 
 block content
+  if reviewed
+    p(style='color: green;') Your review has been submitted successfully!
+
   h2 My Sessions
 
   if sessions.length === 0
@@ -35,20 +38,25 @@ block content
             strong Message: 
             span= s.Initial_Message
 
-        if s.Status === 'Pending'
+        if s.canAccept
+          form(action=`/sessions/${s.SessionID}/accept` method='POST' style='display:inline')
+            button(type='submit') Accept
 
-          if String(user.id) == String(s.TeacherID)
-            p
-              form(action=`/sessions/${s.SessionID}/accept` method='POST' style='display:inline')
-                button(type='submit') Accept
-              |  
-              form(action=`/sessions/${s.SessionID}/decline` method='POST' style='display:inline')
-                button(type='submit') Decline
+        if s.canDecline
+          form(action=`/sessions/${s.SessionID}/decline` method='POST' style='display:inline')
+            button(type='submit') Decline
 
-          if String(user.id) == String(s.LearnerID)
-            p
-              form(action=`/sessions/${s.SessionID}/cancel` method='POST' style='display:inline')
-                button(type='submit') Cancel Request
+        if s.canCancel
+          form(action=`/sessions/${s.SessionID}/cancel` method='POST' style='display:inline')
+            button(type='submit') Cancel Request
+
+        if s.canMessage
+          a(href=`/messages/${s.SessionID}`)
+            button Send Message
+
+        if s.canReview
+          a(href=`/reviews/submit/${s.SessionID}`)
+            button Leave a Review
 
         if s.Status === 'Accepted'
           p(style='color: green;') Session confirmed!
