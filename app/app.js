@@ -64,13 +64,10 @@ app.get("/dashboard", requireLogin, async function(req, res) {
     try {
         const user = await User.getUserById(userId);
         const languages = await User.getUserLanguages(userId);
-
         const rawPending = await Session.getPendingForUser(userId);
         const pending = Session.addPermissions(rawPending, userId);
-
         const rawUpcoming = await Session.getUpcomingForUser(userId);
         const upcoming = Session.addPermissions(rawUpcoming, userId);
-
         const reviews = await db.query(
             `SELECT r.ReviewID, r.Star_Rating, r.Comment,
                 learner.Full_Name AS ReviewerName
@@ -81,7 +78,6 @@ app.get("/dashboard", requireLogin, async function(req, res) {
              ORDER BY r.ReviewID DESC LIMIT 5`,
             [userId]
         );
-
         const totalSessionsRow = await db.query(
             "SELECT COUNT(*) AS total FROM Learning_Sessions WHERE LearnerID = ? OR TeacherID = ?",
             [userId, userId]
@@ -100,18 +96,13 @@ app.get("/dashboard", requireLogin, async function(req, res) {
              WHERE ls.TeacherID = ?`,
             [userId]
         );
-
         const stats = {
             totalSessions: totalSessionsRow[0].total,
             acceptedSessions: acceptedSessionsRow[0].total,
             pendingCount: pendingCountRow[0].total,
             reviewCount: reviewCountRow[0].total
         };
-
-        res.render("dashboard", {
-            title: "My Dashboard",
-            user, languages, pending, upcoming, reviews, stats
-        });
+        res.render("dashboard", { title: "My Dashboard", user, languages, pending, upcoming, reviews, stats });
     } catch (err) {
         console.error(err);
         res.status(500).send("Error loading dashboard.");
@@ -126,9 +117,7 @@ app.get("/messages", requireLogin, async function(req, res) {
     try {
         const conversations = await db.query(
             `SELECT DISTINCT
-                ls.SessionID,
-                ls.LearnerID,
-                ls.TeacherID,
+                ls.SessionID, ls.LearnerID, ls.TeacherID,
                 learner.Full_Name AS LearnerName,
                 teacher.Full_Name AS TeacherName,
                 (SELECT COUNT(*) FROM Messages m 
@@ -251,6 +240,26 @@ app.post("/admin/users/:id/role", requireAdmin, async function(req, res) {
     } catch (err) {
         console.error(err);
         res.status(500).send("Error updating role");
+    }
+});
+
+app.post("/admin/users/:id/suspend", requireAdmin, async function(req, res) {
+    try {
+        await db.query("UPDATE Users SET Suspended = 1 WHERE UserID = ?", [req.params.id]);
+        return res.redirect("/admin/users");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error suspending user.");
+    }
+});
+
+app.post("/admin/users/:id/unsuspend", requireAdmin, async function(req, res) {
+    try {
+        await db.query("UPDATE Users SET Suspended = 0 WHERE UserID = ?", [req.params.id]);
+        return res.redirect("/admin/users");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error unsuspending user.");
     }
 });
 
@@ -379,6 +388,27 @@ app.post("/admin/categories/:id/delete", requireAdmin, async function(req, res) 
 });
 
 // ==============================
+// ADMIN SESSIONS VIEW
+// ==============================
+app.get("/admin/sessions", requireAdmin, async function(req, res) {
+    try {
+        const sessions = await db.query(
+            `SELECT ls.SessionID, ls.Status, ls.Scheduled_Time, ls.Meeting_Place,
+                learner.Full_Name AS LearnerName,
+                teacher.Full_Name AS TeacherName
+             FROM Learning_Sessions ls
+             JOIN Users learner ON ls.LearnerID = learner.UserID
+             JOIN Users teacher ON ls.TeacherID = teacher.UserID
+             ORDER BY ls.SessionID DESC`
+        );
+        res.render("admin/sessions", { title: "All Sessions", sessions });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading sessions.");
+    }
+});
+
+// ==============================
 // AUTH ROUTES
 // ==============================
 app.get("/login", function(req, res) {
@@ -403,6 +433,13 @@ app.post("/login", async function(req, res) {
         if (!user.Password) {
             return res.status(401).render("login", { title: "Login", error: "Invalid credentials.", emailOrUsername });
         }
+        if (user.Suspended) {
+            return res.status(403).render("login", {
+                title: "Login",
+                error: "Your account has been suspended. Please contact support.",
+                emailOrUsername
+            });
+        }
         const passwordMatch = await bcrypt.compare(password, user.Password);
         if (!passwordMatch) {
             return res.status(401).render("login", { title: "Login", error: "Invalid credentials.", emailOrUsername });
@@ -415,7 +452,7 @@ app.post("/login", async function(req, res) {
             role: user.Role,
             profileComplete: !!user.Profile_Complete
         };
-        return res.redirect("/");
+        return res.redirect(user.Role === 'Admin' ? "/admin" : "/");
     } catch (err) {
         console.error(err);
         res.status(500).render("login", { title: "Login", error: "Server error", emailOrUsername: req.body.emailOrUsername || "" });

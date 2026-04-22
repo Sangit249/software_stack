@@ -14,11 +14,7 @@ html
           if currentUser
             a(href="/dashboard") Dashboard
             a(href="/sessions/my") My Sessions
-          if currentUser
-            a(href="/sessions/my") My Sessions
-          if currentUser && currentUser.role === 'Admin'
-            a(href="/admin") Admin
-          if currentUser
+            a(href="/messages") Messages
             a(href="/logout") Logout
           else
             a(href="/login") Login

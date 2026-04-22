@@ -1,0 +1,27 @@
+extends ../layout
+
+block content
+  h2 All Sessions
+  a(href="/admin") Back to Dashboard
+
+  if sessions.length === 0
+    p No sessions found.
+  else
+    table
+      thead
+        tr
+          th ID
+          th Learner
+          th Teacher
+          th Status
+          th Scheduled Time
+          th Meeting Place
+      tbody
+        each s in sessions
+          tr
+            td= s.SessionID
+            td= s.LearnerName
+            td= s.TeacherName
+            td= s.Status
+            td= s.Scheduled_Time
+            td= s.Meeting_Place
