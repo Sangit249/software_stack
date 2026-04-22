@@ -136,10 +136,13 @@ class User {
         LEFT JOIN Languages l ON ul.LanguageID = l.LanguageID
         LEFT JOIN Language_Categories lc ON l.LanguageID = lc.LanguageID
         LEFT JOIN Categories c ON lc.CategoryID = c.CategoryID
-        WHERE l.Language_Name LIKE ?
-        OR u.Username LIKE ?
-        OR u.Full_Name LIKE ?
-        OR c.Category_Name LIKE ?
+        WHERE u.Role != 'Admin'
+        AND (
+            l.Language_Name LIKE ?
+            OR u.Username LIKE ?
+            OR u.Full_Name LIKE ?
+            OR c.Category_Name LIKE ?
+        )
     `;
     return await db.query(sql, [`%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]);
 }

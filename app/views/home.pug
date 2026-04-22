@@ -11,8 +11,8 @@ block content
         h2 Learn Languages. Teach Skills. Connect Globally.
         p Join a friendly language exchange platform where learners and teachers help each other grow.
         
-        form.search-form(action="/search", method="GET")
-          input(type="text", name="language", placeholder="Search by language e.g. Spanish...")
+        form.search-form(action="/search" method="GET")
+          input(type="text" name="query" placeholder="Search by username or language...")
           button(type="submit") Search
 
         .hero-buttons
@@ -40,7 +40,7 @@ block content
       h2 Popular Languages
       .language-list
         each lang in ['English', 'Nepali', 'Hindi', 'Spanish', 'French', 'Japanese']
-          a(href=`/search?language=${lang}`)
+          a(href=`/search?query=${lang}`)
             span.language= lang
 
     footer.footer

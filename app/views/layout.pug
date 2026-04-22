@@ -7,14 +7,13 @@ html
       header
         nav
           a(href="/") Home
-          a(href="/users") Users
           a(href="/languages") Languages
           a(href="/categories") Categories
           a(href="/platform") About
           if currentUser
-            a(href="/dashboard") Dashboard
-            a(href="/sessions/my") My Sessions
+            a(href="/search") Search
             a(href="/messages") Messages
+            a(href="/dashboard") Dashboard
             a(href="/logout") Logout
           else
             a(href="/login") Login

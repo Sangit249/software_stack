@@ -3,6 +3,13 @@ extends layout
 block content
   h2 Welcome back, #{user.name}!
 
+  p
+    a(href='/settings') Settings
+    |  | 
+    a(href='/sessions/my') My Sessions
+    |  | 
+    a(href=`/users/${user.id}`) View Full Profile
+
   hr
 
   h3 Your Stats
@@ -43,8 +50,6 @@ block content
         li #{lang.languageName} — #{lang.languageType} (#{lang.proficiencyLevel})
   else
     p No languages added yet.
-
-  a(href=`/users/${user.id}`) View Full Profile
 
   hr
 
