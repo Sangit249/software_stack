@@ -1,0 +1,38 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'categories'
+
+block content
+  h2.page-title Language Categories
+
+  p.muted(style='margin-bottom:1rem;') Browse languages grouped by family or theme.
+
+  if categories && categories.length
+    - var totalLangs = 0
+    each c in categories
+      - totalLangs += (c.languages ? c.languages.length : 0)
+    .stats-grid
+      .stat-card
+        .stat-number= categories.length
+        .stat-label Categories
+      .stat-card
+        .stat-number= totalLangs
+        .stat-label Languages Categorised
+
+    each category in categories
+      .info-card
+        h3= category.Category_Name
+        if category.Description
+          p= category.Description
+        if category.languages && category.languages.length
+          .lang-pills(style='margin-top:.5rem;')
+            each lang in category.languages
+              a(href='/search?query=' + encodeURIComponent(lang))
+                span= lang
+        else
+          p.muted(style='font-size:.78rem;') No languages in this category yet.
+  else
+    .info-card
+      p.muted No categories found.

@@ -1,0 +1,52 @@
+extends ../layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'admin-sessions'
+
+block content
+  h2.page-title All Sessions
+
+  p.muted(style='margin-bottom:1rem;') A complete list of every learning session on the platform.
+
+  if !sessions || sessions.length === 0
+    .info-card
+      p.muted No sessions have been created yet.
+  else
+    - var pending = sessions.filter(function(s){return s.Status === 'Pending';}).length
+    - var accepted = sessions.filter(function(s){return s.Status === 'Accepted';}).length
+    - var declined = sessions.filter(function(s){return s.Status === 'Declined';}).length
+    - var cancelled = sessions.filter(function(s){return s.Status === 'Cancelled';}).length
+    .stats-grid
+      .stat-card
+        .stat-number= sessions.length
+        .stat-label Total
+      .stat-card
+        .stat-number= pending
+        .stat-label Pending
+      .stat-card
+        .stat-number= accepted
+        .stat-label Accepted
+      .stat-card
+        .stat-number= declined + cancelled
+        .stat-label Declined / Cancelled
+
+    table.data-table
+      thead
+        tr
+          th ID
+          th Learner
+          th Teacher
+          th Status
+          th Scheduled Time
+          th Meeting Place
+      tbody
+        each s in sessions
+          tr
+            td= s.SessionID
+            td= s.LearnerName
+            td= s.TeacherName
+            td
+              span.status-badge(class=(s.Status || '').toLowerCase())= s.Status
+            td(style='font-size:.75rem;')= s.Scheduled_Time
+            td(style='font-size:.75rem;')= s.Meeting_Place

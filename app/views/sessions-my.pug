@@ -1,0 +1,49 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'sessions'
+
+block content
+  h2.page-title My Sessions
+
+  if reviewed
+    .alert.alert-success Your review has been submitted successfully!
+
+  - var tab = tab || 'all'
+
+  .tab-bar
+    a(href='/sessions/my' class=!tab || tab==='all' ? 'active' : null) All Sessions
+    a(href='/sessions/my?tab=pending' class=tab==='pending' ? 'active' : null) Incoming Requests
+    a(href='/sessions/my?tab=upcoming' class=tab==='upcoming' ? 'active' : null) Upcoming
+    a(href='/sessions/my?tab=history' class=tab==='history' ? 'active' : null) History
+
+  if sessions.length === 0
+    p(style='color:var(--muted);font-size:.82rem;') You have no sessions yet.
+  else
+    each s in sessions
+      .session-row
+        .s-avatar= (s.LearnerName || s.TeacherName || '?')[0].toUpperCase()
+        .s-info
+          .s-name
+            | #{s.LearnerName} (Learner) with #{s.TeacherName} (Teacher)
+          .s-meta= (s.Meeting_Place || '') + (s.Scheduled_Time ? ' · ' + s.Scheduled_Time : '')
+          if s.Initial_Message
+            .s-meta= s.Initial_Message
+        .s-actions
+          span.status-badge(class=s.Status.toLowerCase())= s.Status
+          if s.canAccept
+            form(action=`/sessions/${s.SessionID}/accept` method='POST' style='display:inline')
+              button.btn-sm(type='submit') Accept
+          if s.canDecline
+            form(action=`/sessions/${s.SessionID}/decline` method='POST' style='display:inline')
+              button.btn-sm.btn-outline(type='submit') Decline
+          if s.canCancel
+            form(action=`/sessions/${s.SessionID}/cancel` method='POST' style='display:inline')
+              button.btn-sm.btn-outline(type='submit') Cancel
+          if s.canMessage
+            a(href=`/messages/${s.SessionID}`)
+              button.btn-sm(type='button') Message
+          if s.canReview
+            a(href=`/reviews/submit/${s.SessionID}`)
+              button.btn-sm(type='button') Leave Review

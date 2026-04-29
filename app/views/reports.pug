@@ -1,0 +1,57 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'reports'
+
+block content
+  h2.page-title All Reports
+
+  p(style='color:var(--muted);font-size:.85rem;margin-bottom:1rem;') A list of all moderation reports submitted on the platform.
+
+  if !reports || reports.length === 0
+    .info-card
+      p(style='color:var(--muted);') No reports have been submitted yet.
+  else
+    - var pending = reports.filter(r => r.Status === 'Pending').length
+    - var resolved = reports.filter(r => r.Status === 'Resolved').length
+    - var dismissed = reports.filter(r => r.Status === 'Dismissed').length
+    .stats-grid
+      .stat-card
+        .stat-number= reports.length
+        .stat-label Total Reports
+      .stat-card
+        .stat-number= pending
+        .stat-label Pending
+      .stat-card
+        .stat-number= resolved
+        .stat-label Resolved
+      .stat-card
+        .stat-number= dismissed
+        .stat-label Dismissed
+
+    table.data-table
+      thead
+        tr
+          th ID
+          th Reporter
+          th Reported User
+          th Reason
+          th Status
+      tbody
+        each report in reports
+          tr
+            td= report.ReportID
+            td
+              a(href='/users/' + report.ReporterID)= report.ReporterName
+            td
+              a(href='/users/' + report.ReportedUserID)= report.ReportedUserName
+            td(style='max-width:340px;')= report.Reason
+            td
+              - var s = (report.Status || '').toLowerCase()
+              if s === 'resolved'
+                span.status-badge.accepted= report.Status
+              else if s === 'dismissed'
+                span.status-badge.cancelled= report.Status
+              else
+                span.status-badge.pending= report.Status

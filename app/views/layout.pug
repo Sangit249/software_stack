@@ -1,0 +1,76 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title= (title ? title + ' - ' : '') + 'LingoConnect'
+    link(rel='stylesheet' href='/style_1.css')
+
+  block vars
+    - var authPage = false
+    - var activePage = ''
+
+  if authPage
+    body.auth-body
+      block content
+
+  else if currentUser
+    body
+      .sidebar
+        a.sidebar-logo(href='/') LingoConnect
+        nav.sidebar-nav
+          .sidebar-section-title MAIN
+          a(href='/dashboard' class=activePage==='dashboard' ? 'active' : null) Dashboard
+          a(href='/users/'+currentUser.id class=activePage==='profile' ? 'active' : null) My Profile
+          a(href='/user-languages' class=activePage==='userlanguages' ? 'active' : null) My Languages
+          a(href='/messages' class=activePage==='messages' ? 'active' : null) Messages
+          a(href='/sessions/my' class=activePage==='sessions' ? 'active' : null) My Sessions
+
+          .sidebar-section-title DISCOVER
+          a(href='/users' class=activePage==='teachers' ? 'active' : null) Browse Teachers
+          a(href='/search' class=activePage==='search' ? 'active' : null) Search
+          a(href='/languages' class=activePage==='languages' ? 'active' : null) Languages
+          a(href='/categories' class=activePage==='categories' ? 'active' : null) Categories
+
+          .sidebar-section-title COMMUNITY
+          a(href='/reviews' class=activePage==='reviews' ? 'active' : null) Reviews
+          a(href='/reports' class=activePage==='reports' ? 'active' : null) Reports
+          a(href='/platform' class=activePage==='platform' ? 'active' : null) About Platform
+
+          if currentUser.role === 'Admin'
+            .sidebar-section-title ADMIN
+            a(href='/admin' class=activePage==='admin' ? 'active' : null) Admin Dashboard
+            a(href='/admin/users' class=activePage==='admin-users' ? 'active' : null) Manage Users
+            a(href='/admin/reports' class=activePage==='admin-reports' ? 'active' : null) Manage Reports
+            a(href='/admin/languages' class=activePage==='admin-languages' ? 'active' : null) Manage Languages
+            a(href='/admin/categories' class=activePage==='admin-categories' ? 'active' : null) Manage Categories
+            a(href='/admin/sessions' class=activePage==='admin-sessions' ? 'active' : null) All Sessions
+        .sidebar-bottom
+          a(href='/settings' class=activePage==='settings' ? 'active' : null) Settings
+          a.logout(href='/logout') Log Out
+      .main-wrap
+        .topbar
+          .topbar-breadcrumb
+            span= title || 'LingoConnect'
+          .topbar-right
+            span.topbar-username= currentUser.name
+            .topbar-avatar= currentUser.name ? currentUser.name[0].toUpperCase() : 'U'
+        .page-content
+          block content
+
+  else
+    body
+      .sidebar
+        a.sidebar-logo(href='/') LingoConnect
+        nav.sidebar-nav
+          a(href='/' class=activePage==='home' ? 'active' : null) Home
+          a(href='/users') Users
+          a(href='/languages') Languages
+          a(href='/categories') Categories
+          a(href='/platform') About Platform
+        .sidebar-bottom
+          a(href='/login') Login
+          a(href='/signup') Sign Up
+      .main-wrap
+        .page-content
+          block content

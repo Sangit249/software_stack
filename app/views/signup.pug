@@ -1,0 +1,64 @@
+extends layout
+
+block vars
+  - var authPage = true
+  - var activePage = ''
+
+block content
+  .auth-box
+    span.auth-logo LingoConnect
+    h2 Create Account
+    p.auth-subtitle Join the language community
+
+    .auth-tabs
+      a(href='/login') Login
+      a.active(href='/signup') Register
+
+    if error
+      .alert.alert-error= error
+
+    form(method='POST' action='/signup')
+      .form-group
+        label(for='fullName') Full Name
+        input#fullName(
+          type='text'
+          name='fullName'
+          placeholder='Your full name'
+          required
+          value=form && form.fullName || ''
+        )
+      .form-group
+        label(for='email') Email Address
+        input#email(
+          type='email'
+          name='email'
+          placeholder='you@example.com'
+          required
+          value=form && form.email || ''
+        )
+      .form-group
+        label(for='username') Username
+        input#username(
+          type='text'
+          name='username'
+          placeholder='Choose a username'
+          required
+          value=form && form.username || ''
+        )
+      .form-group
+        label(for='role') Role
+        select#role(name='role' required)
+          option(value='') Select role
+          option(value='Learner' selected=form && form.role === 'Learner') Learner
+          option(value='Teacher' selected=form && form.role === 'Teacher') Teacher
+      .form-group
+        label(for='password') Password
+        input#password(type='password' name='password' placeholder='Create a password' required)
+
+      button.btn-submit(type='submit') Create Account
+
+    .auth-divider or
+
+    p.auth-footer
+      | Already have an account?&nbsp;
+      a(href='/login') Log in

@@ -1,0 +1,37 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'teachers'
+
+block content
+  h2.page-title Browse Users
+
+  p.muted(style='margin-bottom:1rem;') Find someone to learn from or teach. Click any card to see their full profile.
+
+  if !users || users.length === 0
+    .info-card
+      p.muted No users to display yet.
+  else
+    .card-grid
+      each u in users
+        .user-card
+          .avatar= u.name ? u.name[0].toUpperCase() : '?'
+          span.name= u.name
+          if u.username
+            span.user-handle @#{u.username}
+          if u.programme
+            - var roleClass = u.programme.toLowerCase()
+            span.role-badge(class=roleClass)= u.programme
+          if u.country
+            span.user-country= u.country
+          p.bio= u.bio || 'No bio provided.'
+          if u.modules && u.modules.length > 0
+            .lang-pills(style='margin-top:.2rem;')
+              each m in u.modules.slice(0, 4)
+                span.tag-pill= m
+          if u.averageRating && Number(u.averageRating) > 0
+            p.rating
+              span ★
+              |  #{Number(u.averageRating).toFixed(1)} / 5
+          a.btn-view(href='/users/' + u.id) View Profile

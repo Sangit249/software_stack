@@ -1,0 +1,46 @@
+extends ../layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'admin-categories'
+
+block content
+  h2.page-title Manage Categories
+
+  p.muted(style='margin-bottom:1rem;') Group languages into categories so learners can browse them more easily.
+
+  .info-card
+    h3 Add a New Category
+    form(action='/admin/categories/add' method='POST')
+      .form-group
+        label Category Name
+        input(type='text' name='category_name' placeholder='e.g. Romance Languages' required)
+      .form-group
+        label Description
+        input(type='text' name='description' placeholder='Optional description')
+      button.btn-red(type='submit') Add Category
+
+  h3(style='margin:1.2rem 0 .6rem;') All Categories
+  if !categories || categories.length === 0
+    .info-card
+      p.muted No categories have been added yet.
+  else
+    table.data-table
+      thead
+        tr
+          th ID
+          th Name
+          th Description
+          th Actions
+      tbody
+        each cat in categories
+          tr
+            td= cat.CategoryID
+            td= cat.Category_Name
+            td= cat.Description || '-'
+            td
+              form(action='/admin/categories/' + cat.CategoryID + '/delete' method='POST' style='display:inline')
+                button.btn-sm.btn-danger(
+                  type='submit'
+                  onclick="return confirm('Delete this category? Languages associated with it will be unlinked.')"
+                ) Delete

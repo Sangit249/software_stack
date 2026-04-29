@@ -1,0 +1,72 @@
+extends layout
+
+block content
+  .page-container
+    h2.page-title About LingoConnect
+
+    // Mission Section
+    .info-card
+      h3 Our Mission
+      p LingoConnect is designed to connect people across the world through language learning. Our goal is to make learning accessible, interactive, and community-driven by allowing users to both teach and learn languages.
+
+    // How It Works
+    .info-card
+      h3 How It Works
+      ul
+        li Create a profile and choose your languages
+        li Connect with learners or teachers
+        li Schedule and join learning sessions
+        li Leave reviews and improve your skills
+
+    // Features Section
+    .info-card
+      h3 Key Features
+      ul
+        li Language exchange between learners and teachers
+        li Session scheduling and tracking
+        li User rating and review system
+        li Reporting system for safety and moderation
+
+    // Trust Section
+    .info-card
+      h3 Trust & Safety
+      p We prioritize user safety and platform reliability.
+      ul
+        li Transparent rating system for all users
+        li Reporting system to handle misuse
+        li Session tracking for accountability
+
+    // Statistics
+    .info-card
+      h3 Platform Statistics
+      table.data-table
+        tr
+          th Total Users
+          td= stats.totalUsers
+        tr
+          th Total Languages
+          td= stats.totalLanguages
+        tr
+          th Total Sessions
+          td= stats.totalSessions
+        tr
+          th Pending Reports
+          td= stats.pendingReports
+
+    // Recent Activity
+    .info-card
+      h3 Recent Sessions
+      table.data-table
+        thead
+          tr
+            th Session ID
+            th Learner
+            th Teacher
+            th Status
+        tbody
+          each session in recentSessions
+            tr
+              td= session.SessionID
+              td= session.LearnerName
+              td= session.TeacherName
+              td= session.Status

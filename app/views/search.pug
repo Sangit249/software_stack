@@ -1,0 +1,69 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'teachers'
+
+block content
+  h2.page-title Search Users
+
+  .card(style='max-width:560px;margin-bottom:1.2rem;')
+    form.home-search(action='/search' method='GET' style='max-width:100%;')
+      input(
+        id='searchInput'
+        type='text'
+        name='query'
+        value=query
+        placeholder='Search by username or language…'
+        autocomplete='off'
+      )
+      button(type='submit') Search
+
+  .info-card(style='margin-bottom:1.2rem;')
+    h3 Browse by Category
+    #categoryList.lang-pills
+
+  if query
+    if users.length === 0
+      p(style='color:var(--muted);') No users found for "#{query}"
+    else
+      p(style='font-size:.82rem;color:var(--muted);margin-bottom:.8rem;') Found #{users.length} result(s) for "#{query}"
+      table.data-table
+        thead
+          tr
+            th Name
+            th Username
+            th Role
+            th Language
+            th Type
+            th Proficiency
+            th
+        tbody
+          each u in users
+            tr
+              td= u.Full_Name
+              td= u.Username
+              td= u.Role
+              td= u.Language_Name || '-'
+              td= u.Language_Type || '-'
+              td= u.Proficiency_Level || '-'
+              td
+                a(href='/users/' + u.UserID) View Profile
+  else
+    p(style='color:var(--muted);font-size:.82rem;') Enter a username or language to search.
+
+  script.
+    async function loadCategories() {
+      const res = await fetch('/api/categories?q=');
+      const categories = await res.json();
+      const list = document.getElementById('categoryList');
+      categories.forEach(cat => {
+        const a = document.createElement('a');
+        a.href = '/search?query=' + encodeURIComponent(cat.Category_Name);
+        const span = document.createElement('span');
+        span.textContent = cat.Category_Name;
+        a.appendChild(span);
+        list.appendChild(a);
+      });
+    }
+    loadCategories();

@@ -1,0 +1,132 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = ''
+
+block content
+  h2.page-title Complete Your Profile
+  .alert(style='background:#fffbeb;color:#92400e;border:1px solid #fde68a;margin-bottom:1rem;') You need to complete your profile before you can access the rest of LingoConnect. This only takes a minute.
+  p Tell us a bit about yourself so we can match you with the right language partners.
+
+  if error
+    .alert.alert-error= error
+
+  form(action='/complete-profile' method='POST')
+
+    .info-card
+      h3 Languages
+      p Add the languages you speak, are currently learning, or want to teach. You can add more later in Settings.
+      #languages-container
+        .lang-row(style='display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:wrap;align-items:flex-end;')
+          .form-group(style='flex:1.5;min-width:120px;margin-bottom:0;')
+            label Language
+            select(name='languageId[]')
+              option(value='') Select a language
+              each lang in languages
+                option(value=lang.LanguageID)= lang.Language_Name
+          .form-group(style='flex:1;min-width:120px;margin-bottom:0;')
+            label Type
+            select(name='language_type[]')
+              option(value='Native') Native
+              option(value='Fluent') Fluent
+              option(value='Learning') Learning
+              option(value='Teaching') Teaching
+          .form-group(style='flex:1;min-width:110px;margin-bottom:0;')
+            label Level
+            select(name='proficiency_level[]')
+              option(value='Beginner') Beginner
+              option(value='Elementary') Elementary
+              option(value='Intermediate') Intermediate
+              option(value='Upper-Intermediate') Upper-Intermediate
+              option(value='Advanced') Advanced
+              option(value='Native') Native / Fluent
+          button.btn-outline.btn-sm(type='button' onclick='removeRow(this)' style='flex-shrink:0;margin-bottom:0;') Remove
+      button.btn-outline(type='button' onclick='addLanguage()') + Add Another Language
+
+    .info-card
+      h3 When are you available?
+      p Add the days and times you are typically free for language exchange sessions.
+      #availability-container
+        .avail-row(style='display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:wrap;align-items:flex-end;')
+          .form-group(style='flex:1;min-width:110px;margin-bottom:0;')
+            label Day
+            select(name='day_of_week[]')
+              option Monday
+              option Tuesday
+              option Wednesday
+              option Thursday
+              option Friday
+              option Saturday
+              option Sunday
+          .form-group(style='flex:1;min-width:100px;margin-bottom:0;')
+            label Start time
+            input(type='time' name='start_time[]')
+          .form-group(style='flex:1;min-width:100px;margin-bottom:0;')
+            label End time
+            input(type='time' name='end_time[]')
+          .form-group(style='flex:1.2;min-width:130px;margin-bottom:0;')
+            label Time zone
+            input(type='text' name='time_zone[]' placeholder='e.g. Europe/London')
+          button.btn-outline.btn-sm(type='button' onclick='removeRow(this)' style='flex-shrink:0;margin-bottom:0;') Remove
+      button.btn-outline(type='button' onclick='addAvailability()') + Add Another Time Slot
+
+    .info-card
+      h3 Interests
+      p Add hobbies or topics you enjoy. This helps us match you with partners who share your interests.
+      #interests-container
+        .form-group
+          input(type='text' name='interest_name[]' placeholder='e.g. Gaming, Travel, Cooking')
+      button.btn-outline(type='button' onclick='addInterest()') + Add Another Interest
+
+    .info-card
+      h3 Learning Preferences
+      p These help us suggest the right kind of sessions for you. You can always change these later.
+      .form-group
+        label How do you prefer to practise?
+        select(name='practice_method')
+          option(value='') Choose an option
+          option(value='Voice Call') Voice call
+          option(value='Video Call') Video call
+          option(value='Text Chat') Text chat
+          option(value='No Preference') No preference
+      .form-group
+        label Preferred session format
+        select(name='preferred_session_type')
+          option(value='') Choose an option
+          option(value='One-to-One') One-to-one (just you and a partner)
+          option(value='Group') Group session
+          option(value='No Preference') No preference
+      .form-group
+        label What is your main learning goal?
+        input(type='text' name='learning_goal' placeholder='e.g. Improve my spoken English for job interviews')
+
+    button.btn-red(type='submit' style='margin-top:.5rem;') Save and Continue
+
+  script.
+    function removeRow(btn) {
+      btn.closest('.lang-row, .avail-row').remove();
+    }
+    function addLanguage() {
+      const container = document.getElementById('languages-container');
+      const row = container.querySelector('.lang-row').cloneNode(true);
+      row.querySelectorAll('select, input').forEach(el => el.value = '');
+      container.appendChild(row);
+    }
+    function addAvailability() {
+      const container = document.getElementById('availability-container');
+      const row = container.querySelector('.avail-row').cloneNode(true);
+      row.querySelectorAll('select, input').forEach(el => el.value = '');
+      container.appendChild(row);
+    }
+    function addInterest() {
+      const container = document.getElementById('interests-container');
+      const div = document.createElement('div');
+      div.className = 'form-group';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.name = 'interest_name[]';
+      input.placeholder = 'e.g. Hiking, Photography';
+      div.appendChild(input);
+      container.appendChild(div);
+    }

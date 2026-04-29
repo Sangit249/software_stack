@@ -1,0 +1,36 @@
+extends layout
+
+block content
+  .home-hero
+    h1 Learn Languages. Teach Skills. Connect Globally.
+    p Join a friendly language exchange platform where learners and teachers help each other grow.
+
+    form.home-search(action="/search" method="GET")
+      input(type="text" name="language" placeholder="Search languages, users or categories…")
+      button(type="submit") Search
+
+    .home-buttons
+      a(href="/users")
+        button(type="button") Browse Teachers
+      a(href="/languages")
+        button(type="button") Browse Languages
+      a(href="/categories")
+        button(type="button") View Categories
+
+  h3(style="margin-bottom:.75rem;") Why Use Our Platform?
+  .feature-cards
+    .card
+      h3 🌍 Find Language Partners
+      p Connect with learners and teachers from different countries and backgrounds.
+    .card
+      h3 📈 Learn at Your Level
+      p Practice beginner, intermediate, or advanced skills at your own pace.
+    .card
+      h3 🎓 Teach and Share
+      p Help others learn your native language and build your teaching experience.
+
+  h3(style="margin-bottom:.55rem;") Popular Languages
+  .lang-pills
+    each lang in ['English', 'Nepali', 'Hindi', 'Spanish', 'French', 'Japanese']
+      a(href=`/search?language=${lang}`)
+        span= lang

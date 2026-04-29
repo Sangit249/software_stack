@@ -1,0 +1,48 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'sessions'
+
+block content
+  .topbar-breadcrumb(style='margin-bottom:1rem;font-size:.8rem;')
+    a(href='/sessions/my') My Sessions
+    |  /
+    span Leave a Review
+
+  .card(style='max-width:520px;')
+    h3(style='margin-bottom:1rem;') Rate Your Session
+
+    .session-row(style='border:none;padding:0;box-shadow:none;margin-bottom:1rem;')
+      .s-avatar= session.TeacherName ? session.TeacherName[0].toUpperCase() : '?'
+      .s-info
+        .s-name Session with #{session.TeacherName}
+        .s-meta= session.Meeting_Place + (session.Scheduled_Time ? ' · ' + session.Scheduled_Time : '')
+
+    if error
+      .alert.alert-error= error
+
+    form(action='/reviews/submit' method='POST')
+      input(type='hidden' name='sessionId' value=session.SessionID)
+
+      .form-group
+        label Star Rating (1–5)
+        select(name='star_rating' required)
+          option(value='') Select a rating
+          option(value='5') 5 - Excellent
+          option(value='4') 4 - Good
+          option(value='3') 3 - Average
+          option(value='2') 2 - Poor
+          option(value='1') 1 - Very Poor
+
+      .form-group
+        label Comment (optional)
+        textarea(
+          name='comment'
+          placeholder='Share your experience with this teacher…'
+        )
+
+      .s-actions(style='justify-content:flex-start;margin-top:.5rem;')
+        button.btn-red(type='submit') Submit Rating
+        a(href='/sessions/my')
+          button.btn-outline(type='button') Cancel

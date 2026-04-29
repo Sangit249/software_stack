@@ -1,0 +1,116 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'settings'
+
+block content
+  h2.page-title Settings
+
+  if error
+    .alert.alert-error= error
+  if success === 'profile'
+    .alert.alert-success Profile updated successfully.
+  if success === 'account'
+    .alert.alert-success Account updated successfully.
+  if success === 'password'
+    .alert.alert-success Password updated successfully.
+  if success === 'preferences'
+    .alert.alert-success Preferences updated successfully.
+  if success === 'languages'
+    .alert.alert-success Languages updated successfully.
+
+  .info-card
+    h3 Profile
+    form(action='/settings/profile' method='POST')
+      .form-group
+        label Bio
+        textarea(name='bio' rows='4')= user.bio || ''
+      .form-group
+        label Country
+        input(type='text' name='country' value=user.country || '')
+      .form-group
+        label Profile Image URL
+        input(type='text' name='profile_image' value=user.profileImage || '')
+      button(type='submit') Update Profile
+
+  .info-card
+    h3 Account
+    form(action='/settings/account' method='POST')
+      .form-group
+        label Username
+        input(type='text' name='username' value=user.username || '')
+      .form-group
+        label Email
+        input(type='email' name='email' value=user.email || '')
+      button(type='submit') Update Account
+
+  .info-card
+    h3 Change Password
+    form(action='/settings/password' method='POST')
+      .form-group
+        label Current Password
+        input(type='password' name='current_password' required)
+      .form-group
+        label New Password
+        input(type='password' name='new_password' required)
+      button(type='submit') Change Password
+
+  .info-card
+    h3 Preferences
+    form(action='/settings/preferences' method='POST')
+      .form-group
+        label Practice Method
+        input(type='text' name='practice_method' value=preferences && preferences.practiceMethod || '')
+      .form-group
+        label Preferred Session Type
+        input(type='text' name='preferred_session_type' value=preferences && preferences.preferredSessionType || '')
+      .form-group
+        label Learning Goal
+        input(type='text' name='learning_goal' value=preferences && preferences.learningGoal || '')
+      button(type='submit') Update Preferences
+
+  .info-card
+    h3 Languages
+    if languages && languages.length > 0
+      table.data-table(style='margin-bottom:1rem;')
+        thead
+          tr
+            th Language
+            th Type
+            th Proficiency
+            th
+        tbody
+          each lang in languages
+            tr
+              td= lang.languageName
+              td= lang.languageType
+              td= lang.proficiencyLevel
+              td
+                form(action=`/settings/languages/${lang.languageId}/delete` method='POST')
+                  button.btn-sm.btn-outline-red(
+                    type='submit'
+                    onclick='return confirm("Remove this language?")'
+                  ) Remove
+    else
+      p(style='color:var(--muted);font-size:.82rem;margin-bottom:.8rem;') No languages added yet.
+
+    h3(style='margin-bottom:.6rem;') Add Language
+    form(action='/settings/languages/add' method='POST')
+      .form-group
+        label Language
+        select(name='languageId')
+          each lang in allLanguages
+            option(value=lang.LanguageID)= lang.Language_Name
+      .form-group
+        label Type
+        select(name='language_type')
+          option(value='Native') Native
+          option(value='Learning') Learning
+      .form-group
+        label Proficiency
+        select(name='proficiency_level')
+          option(value='beginner') Beginner
+          option(value='intermediate') Intermediate
+          option(value='advanced') Advanced
+      button(type='submit') Add Language

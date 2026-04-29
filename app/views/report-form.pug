@@ -1,0 +1,33 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = ''
+
+block content
+  .topbar-breadcrumb(style='margin-bottom:1rem;font-size:.8rem;')
+    a(href='/users/'+reportedUser.id)= reportedUser.name
+    |  /
+    span Report User
+
+  .card(style='max-width:520px;')
+    h3(style='margin-bottom:1rem;') Report #{reportedUser.name}
+
+    if error
+      .alert.alert-error= error
+
+    form(action='/reports/submit' method='POST')
+      input(type='hidden' name='reportedUserId' value=reportedUser.id)
+
+      .form-group
+        label Reason for Report
+        textarea(
+          name='reason'
+          placeholder='Describe why you are reporting this user…'
+          required
+        )
+
+      .s-actions(style='justify-content:flex-start;margin-top:.5rem;')
+        button.btn-red(type='submit') Submit Report
+        a(href='/users/'+reportedUser.id)
+          button.btn-outline(type='button') Cancel

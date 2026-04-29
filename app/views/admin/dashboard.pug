@@ -1,0 +1,40 @@
+extends ../layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'admin'
+
+block content
+  h2.page-title Admin Dashboard
+
+  p.muted(style='margin-bottom:1rem;') Welcome to the admin control centre. Manage users, content, and platform safety from here.
+
+  .stats-grid
+    .stat-card
+      .stat-number= stats.totalUsers
+      .stat-label Total Users
+    .stat-card
+      .stat-number= stats.totalSessions
+      .stat-label Total Sessions
+    .stat-card
+      .stat-number= stats.totalReports
+      .stat-label Total Reports
+    .stat-card
+      .stat-number= stats.pendingReports
+      .stat-label Pending Reports
+
+  h3(style='margin:1.2rem 0 .6rem;') Quick Links
+  .admin-links
+    a(href='/admin/users') Manage Users
+    a(href='/admin/reports') Manage Reports
+    a(href='/admin/languages') Manage Languages
+    a(href='/admin/categories') Manage Categories
+    a(href='/admin/sessions') All Sessions
+
+  h3(style='margin:1.2rem 0 .6rem;') Helpful Pages
+  .admin-links
+    a(href='/dashboard') My Dashboard
+    a(href='/platform') Platform Overview
+    a(href='/reviews') All Reviews
+    a(href='/reports') All Reports
+    a(href='/') Back to Home

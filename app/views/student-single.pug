@@ -1,0 +1,17 @@
+extends layout
+
+block content
+    h1 Student profile
+
+    .profile-card
+        p
+            strong ID:
+            | #{student.id}
+        p
+            strong Name:
+            | #{student.name}
+        p
+            strong Email:
+            | #{student.email}
+
+    a(href="/all-students-formatted") Back to list

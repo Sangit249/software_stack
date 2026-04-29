@@ -1,0 +1,50 @@
+extends ../layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'admin-languages'
+
+block content
+  h2.page-title Manage Languages
+
+  p(style='color:var(--muted);font-size:.85rem;margin-bottom:1rem;') Add new languages to the platform or remove ones that are no longer needed.
+
+  if error
+    .alert.alert-error= error
+
+  .info-card
+    h3 Add a New Language
+    form(action='/admin/languages/add' method='POST')
+      .form-group
+        label Language Name
+        input(type='text' name='language_name' placeholder='e.g. Portuguese' required)
+      .form-group
+        label Category
+        select(name='category_id')
+          option(value='') -- No Category --
+          each cat in categories
+            option(value=cat.CategoryID)= cat.Category_Name
+      button.btn-red(type='submit') Add Language
+
+  h3(style='margin:1.2rem 0 .6rem;') All Languages
+  if !languages || languages.length === 0
+    .info-card
+      p(style='color:var(--muted);') No languages have been added yet.
+  else
+    table.data-table
+      thead
+        tr
+          th ID
+          th Name
+          th Actions
+      tbody
+        each lang in languages
+          tr
+            td= lang.LanguageID
+            td= lang.Language_Name
+            td
+              form(action=`/admin/languages/${lang.LanguageID}/delete` method='POST' style='display:inline')
+                button.btn-sm.btn-danger(
+                  type='submit'
+                  onclick="return confirm('Delete this language? This will remove it from all user profiles.')"
+                ) Delete

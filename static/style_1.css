@@ -1,0 +1,848 @@
+/* ============================================================
+   LingoConnect - Main Stylesheet
+   Written by: Kagan Demirtas
+   
+   This is the single CSS file that styles the entire frontend
+   of LingoConnect. Every page in the app loads this file via
+   the <link> tag in layout.pug.
+
+   I organised it into clearly labelled sections so it's easy
+   to find and edit specific parts. The structure follows the
+   wireframes we designed in Sprint 2 and 3 - a fixed dark
+   sidebar on the left, a dark top bar, and a white content
+   area on the right.
+   ============================================================ */
+
+
+/* ============================================================
+   SECTION 1 - GOOGLE FONTS IMPORT
+   
+   I'm loading the "Inter" font from Google Fonts. Inter is a
+   clean, modern font designed specifically for screens and UI,
+   which is why I chose it to match the wireframe aesthetic.
+   The different weights (300 to 700) give me flexibility for
+   things like light body text vs bold headings.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+
+/* ============================================================
+   SECTION 2 - CSS VARIABLES (Design Tokens)
+   
+   Instead of hardcoding colours and sizes throughout the file,
+   I defined them all here as CSS custom properties (variables).
+   This means if I want to change the red accent colour, I only
+   need to change it in ONE place here and it updates everywhere.
+   
+   Variables are defined on :root which means they're available
+   globally across the entire stylesheet. You access them with
+   var(--variable-name).
+   ============================================================ */
+:root {
+  /* Sidebar colours */
+  --sidebar-bg:    #1c1c1e;   /* near-black background for the sidebar */
+  --sidebar-w:     185px;     /* fixed width of the sidebar */
+  --topbar-bg:     #2c2c2e;   /* slightly lighter dark for the top bar */
+  --topbar-h:      44px;      /* height of the top bar */
+
+  /* Brand / accent colours */
+  --red:           #e53e3e;   /* main red accent - used for buttons, active states, the logo */
+  --red-dark:      #c53030;   /* darker red for hover states */
+
+  /* Content area colours */
+  --white:         #ffffff;
+  --content-bg:    #f5f5f5;   /* light grey page background */
+  --card-bg:       #ffffff;   /* white background for cards */
+  --border:        #e2e2e2;   /* light grey for borders and dividers */
+  --ink:           #1a1a1a;   /* near-black for headings and important text */
+  --muted:         #6b7280;   /* grey for secondary/less important text */
+  --muted-light:   #9ca3af;   /* even lighter grey, used for dividers */
+  --sidebar-text:  #c8c8cc;   /* light grey text inside the dark sidebar */
+  --sidebar-hover: rgba(255,255,255,.08); /* subtle white tint on sidebar hover */
+
+  /* Shadows - I use two levels, small and medium */
+  --shadow-sm:     0 1px 3px rgba(0,0,0,.08);
+  --shadow-md:     0 4px 12px rgba(0,0,0,.10);
+
+  /* Border radius - used to round corners on cards and buttons */
+  --radius:        8px;       /* standard rounding for cards */
+  --radius-sm:     5px;       /* smaller rounding for buttons and inputs */
+
+  /* Font stack - Inter first, then system fallbacks */
+  --font:          'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Transition speed - used for all hover animations */
+  --t:             .15s ease;
+}
+
+
+/* ============================================================
+   SECTION 3 - RESET & BASE STYLES
+   
+   Every browser has its own default styles which can cause
+   inconsistencies. This reset removes them so the app looks
+   the same in Chrome, Firefox, Safari etc.
+   
+   box-sizing: border-box means padding and borders are
+   included in an element's width/height calculation, which
+   makes layouts much more predictable to work with.
+   ============================================================ */
+
+/* Apply box-sizing to every element including pseudo-elements */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Set the base font size to 14px. All rem units in the file
+   are relative to this - so 1rem = 14px, 1.2rem = 16.8px etc. */
+html { font-size: 14px; }
+
+/* The body uses flexbox so the sidebar and main content area
+   sit side by side. min-height: 100vh ensures it always fills
+   the full screen height even on short pages. */
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--content-bg);
+  min-height: 100vh;
+  display: flex; /* makes sidebar and main-wrap sit side by side */
+}
+
+/* Remove underlines from links and apply the red accent colour.
+   The transition smoothly animates the colour change on hover. */
+a { color: var(--red); text-decoration: none; transition: color var(--t); }
+a:hover { color: var(--red-dark); }
+
+/* Consistent heading styles across the app */
+h1,h2,h3,h4 { font-weight: 600; line-height: 1.3; color: var(--ink); }
+h1 { font-size: 1.4rem; }
+h2 { font-size: 1.2rem; }
+h3 { font-size: 1rem; }
+
+/* Paragraph text is slightly smaller and uses the muted grey colour */
+p  { color: var(--muted); line-height: 1.6; margin-bottom: .35rem; font-size: .85rem; }
+
+/* Horizontal rule - just a simple grey line */
+hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+
+
+/* ============================================================
+   SECTION 4 - AUTH PAGES (Login and Signup)
+   
+   The login and signup pages don't show the sidebar - they're
+   standalone pages centred on a dark background. I achieve
+   this by adding the class "auth-body" to the <body> tag on
+   those pages (done in layout.pug), which overrides the normal
+   body flexbox layout.
+   ============================================================ */
+
+/* Dark background, centres the card both horizontally and vertically */
+body.auth-body {
+  display: flex;
+  align-items: center;      /* vertical centre */
+  justify-content: center;  /* horizontal centre */
+  background: #1c1c1e;      /* same dark colour as the sidebar */
+}
+
+/* The white card that contains the login/signup form */
+.auth-box {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 2rem 1.8rem;
+  width: 100%;
+  max-width: 340px;           /* cap the width so it doesn't stretch too wide */
+  box-shadow: 0 8px 32px rgba(0,0,0,.4); /* strong shadow since it's on dark bg */
+  text-align: center;
+}
+
+/* The "LingoConnect" badge at the top of the login card */
+.auth-logo {
+  display: inline-block;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: #f0f0f0;
+  border-radius: var(--radius-sm);
+  padding: .35rem .85rem;
+  margin-bottom: 1rem;
+}
+
+.auth-box h2 { font-size: 1.1rem; margin-bottom: .2rem; }
+.auth-subtitle { font-size: .78rem; color: var(--muted); margin-bottom: 1rem; }
+
+/* Login / Register tab switcher at the top of the auth card.
+   Uses flexbox so both tabs share equal width.
+   overflow: hidden clips the border-radius on the inner elements. */
+.auth-tabs {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+}
+
+/* Each tab takes up half the width (flex: 1) */
+.auth-tabs a {
+  flex: 1;
+  padding: .48rem;
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--white);
+  transition: background var(--t), color var(--t);
+}
+
+/* The active tab is filled dark to show which page you're on */
+.auth-tabs a.active { background: var(--ink); color: var(--white); }
+.auth-tabs a:hover:not(.active) { background: #f5f5f5; color: var(--ink); }
+
+/* Form fields inside the auth card */
+.auth-box .form-group { margin-bottom: .8rem; text-align: left; }
+.auth-box label { display: block; font-size: .76rem; font-weight: 500; color: var(--ink); margin-bottom: .28rem; }
+.auth-box input, .auth-box select {
+  width: 100%;
+  padding: .5rem .7rem;
+  font-family: var(--font);
+  font-size: .83rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;              /* remove default browser outline */
+  transition: border-color var(--t), box-shadow var(--t);
+  appearance: none;           /* remove default browser styling on selects */
+  color: var(--ink);
+}
+
+/* When an input is focused, darken the border and add a subtle glow */
+.auth-box input:focus, .auth-box select:focus {
+  border-color: #888;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.07);
+}
+
+/* "Forgot password?" link - pushed to the right */
+.auth-forgot { display: block; text-align: right; font-size: .72rem; color: var(--muted); margin-bottom: .7rem; }
+
+/* The main submit button on login/signup - full width, dark background */
+.auth-box .btn-submit {
+  width: 100%;
+  padding: .58rem;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t);
+  margin-top: .2rem;
+}
+.auth-box .btn-submit:hover { background: #333; }
+
+/* The "- or -" divider line between the submit button and the footer link.
+   I use ::before and ::after pseudo-elements to draw the lines on each side. */
+.auth-divider { display: flex; align-items: center; gap: .5rem; margin: .8rem 0; color: var(--muted-light); font-size: .72rem; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; border-top: 1px solid var(--border); }
+
+/* Footer text at the bottom of the auth card e.g. "Already have an account?" */
+.auth-footer { font-size: .75rem; color: var(--muted); margin-top: .7rem; }
+.auth-footer a { color: var(--ink); font-weight: 500; }
+
+
+/* ============================================================
+   SECTION 5 - ALERTS
+   
+   Used to show success or error messages on forms, e.g.
+   "Invalid credentials" on the login page, or "Review submitted"
+   on the sessions page. I apply the base .alert class plus
+   either .alert-error or .alert-success.
+   ============================================================ */
+.alert { padding: .5rem .75rem; border-radius: var(--radius-sm); font-size: .78rem; margin-bottom: .8rem; }
+.alert-error   { background: #fff5f5; color: var(--red); border: 1px solid #fed7d7; }   /* red tint */
+.alert-success { background: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }      /* green tint */
+
+
+/* ============================================================
+   SECTION 6 - APP SHELL: SIDEBAR
+   
+   The sidebar is the fixed dark navigation panel on the left.
+   It's "fixed" which means it stays in place when you scroll -
+   it's always visible. The main content area is offset by the
+   same width (165px) so they don't overlap.
+   
+   I use flexbox with flex-direction: column so the logo is at
+   the top, the nav links fill the middle, and the Settings/
+   Log Out links sit at the bottom.
+   ============================================================ */
+.sidebar {
+  width: var(--sidebar-w);       /* 165px - matches the wireframe */
+  min-width: var(--sidebar-w);
+  background: var(--sidebar-bg); /* near-black #1c1c1e */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;        /* stack children vertically */
+  position: fixed;               /* stays in place when scrolling */
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;                   /* sits on top of other content */
+  overflow-y: auto;              /* scrollable if nav links overflow */
+}
+
+/* The red "LingoConnect" logo button at the very top of the sidebar */
+.sidebar-logo {
+  display: block;
+  background: var(--red);
+  color: var(--white);
+  font-size: .82rem;
+  font-weight: 700;
+  padding: .6rem .85rem;
+  margin: .75rem .7rem .4rem;    /* small gap around the logo */
+  border-radius: var(--radius-sm);
+  text-align: center;
+  letter-spacing: .01em;
+}
+.sidebar-logo:hover { background: var(--red-dark); color: var(--white); }
+
+/* The main nav section - flex: 1 makes it expand to fill all
+   available space between the logo and the bottom links */
+.sidebar-nav { flex: 1; padding: .25rem 0; }
+
+/* Section title labels grouping nav links e.g. "MAIN", "DISCOVER" */
+.sidebar-section-title {
+  display: block;
+  padding: .65rem .85rem .25rem;
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.32);
+  text-transform: uppercase;
+}
+.sidebar-section-title:first-child { padding-top: .35rem; }
+
+/* Each nav link */
+.sidebar-nav a {
+  display: block;
+  padding: .42rem .85rem;
+  font-size: .78rem;
+  font-weight: 400;
+  color: var(--sidebar-text);    /* light grey text */
+  border-left: 3px solid transparent; /* invisible border - becomes red when active */
+  margin: .02rem 0;
+  transition: background var(--t), color var(--t);
+}
+.sidebar-nav a:hover { background: var(--sidebar-hover); color: var(--white); }
+
+/* Active link - red left border + slightly lighter background */
+.sidebar-nav a.active {
+  background: var(--sidebar-hover);
+  color: var(--white);
+  border-left-color: var(--red); /* the red indicator line on the left */
+  font-weight: 500;
+}
+
+/* Settings and Log Out pinned to the bottom of the sidebar */
+.sidebar-bottom {
+  border-top: 1px solid rgba(255,255,255,.08); /* subtle separator line */
+  padding: .4rem 0 .9rem;
+}
+.sidebar-bottom a {
+  display: block;
+  padding: .48rem .85rem;
+  font-size: .78rem;
+  color: rgba(255,255,255,.38);  /* very faint - de-emphasised */
+  transition: color var(--t), background var(--t);
+}
+.sidebar-bottom a:hover { color: var(--white); background: var(--sidebar-hover); }
+.sidebar-bottom a.logout { color: rgba(229,62,62,.6); } /* logout is red-tinted */
+.sidebar-bottom a.logout:hover { color: var(--red); }
+
+
+/* ============================================================
+   SECTION 7 - APP SHELL: MAIN AREA
+   
+   The main area sits to the right of the sidebar. It has two
+   parts: the topbar (dark header with breadcrumb + avatar) and
+   the page content area below it.
+   
+   margin-left: var(--sidebar-w) offsets it by exactly the
+   sidebar width so they don't overlap.
+   ============================================================ */
+.main-wrap {
+  margin-left: var(--sidebar-w); /* push right by sidebar width */
+  flex: 1;                       /* fill remaining horizontal space */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* The dark top bar - sticky means it stays at the top when scrolling */
+.topbar {
+  background: var(--topbar-bg);
+  height: var(--topbar-h);       /* 44px - compact bar */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* breadcrumb left, avatar right */
+  padding: 0 1.3rem;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* Breadcrumb text on the left of the topbar e.g. "Dashboard / Sessions" */
+.topbar-breadcrumb { font-size: .76rem; color: rgba(255,255,255,.45); }
+.topbar-breadcrumb span { color: rgba(255,255,255,.82); font-weight: 500; } /* current page is brighter */
+.topbar-breadcrumb a { color: rgba(255,255,255,.4); }
+.topbar-breadcrumb a:hover { color: rgba(255,255,255,.75); }
+
+/* Username + avatar circle on the right of the topbar */
+.topbar-right { display: flex; align-items: center; gap: .6rem; }
+.topbar-username { font-size: .76rem; color: rgba(255,255,255,.5); }
+
+/* The circular avatar showing the user's initial - e.g. "K" for Kagan */
+.topbar-avatar {
+  width: 27px; height: 27px;
+  border-radius: 50%;            /* makes it a circle */
+  background: var(--red);
+  color: var(--white);
+  font-size: .7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;     /* ensures the initial is always uppercase */
+  flex-shrink: 0;                /* prevents it from shrinking */
+}
+
+/* The white content area below the topbar */
+.page-content { padding: 1.5rem 1.7rem; flex: 1; }
+
+/* Standard page title at the top of each content area */
+.page-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 1.1rem; }
+
+
+/* ============================================================
+   SECTION 8 - BUTTONS
+   
+   I have one base button style and several modifier classes
+   to create variants. This follows the BEM-like approach of
+   a base class + modifier classes.
+   
+   Base: button / .btn - dark background, white text
+   .btn-red - red background (for primary actions)
+   .btn-outline - transparent with a border (secondary actions)
+   .btn-outline-red - transparent with red border (destructive secondary)
+   .btn-danger - red background (for destructive actions like delete)
+   .btn-sm - smaller padding and font size
+   ============================================================ */
+button, .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: .78rem;
+  padding: .4rem .95rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--t), border-color var(--t);
+  background: var(--ink);        /* default is dark */
+  color: var(--white);
+  white-space: nowrap;           /* prevent text wrapping inside buttons */
+}
+button:hover, .btn:hover { background: #333; }
+
+/* Red button - used for primary actions like "Send Request" */
+button.btn-red { background: var(--red); }
+button.btn-red:hover { background: var(--red-dark); }
+
+/* Outline button - transparent with a grey border, for secondary actions */
+button.btn-outline { background: transparent; color: var(--ink); border-color: var(--border); }
+button.btn-outline:hover { background: #f0f0f0; }
+
+/* Red outline - used for things like "Report User" */
+button.btn-outline-red { background: transparent; color: var(--red); border-color: var(--red); }
+button.btn-outline-red:hover { background: #fff5f5; }
+
+/* Small button variant */
+button.btn-sm { padding: .28rem .65rem; font-size: .73rem; }
+
+/* Danger button - same as btn-red, used for destructive actions */
+button.btn-danger { background: var(--red); }
+button.btn-danger:hover { background: var(--red-dark); }
+
+
+/* ============================================================
+   SECTION 9 - FORM ELEMENTS
+   
+   Consistent styles for all inputs, textareas and selects
+   across the app. I target them by type to avoid having to
+   add classes to every individual input element.
+   ============================================================ */
+.form-group { margin-bottom: .95rem; } /* spacing between form fields */
+
+label { display: block; font-size: .78rem; font-weight: 500; color: var(--ink); margin-bottom: .28rem; }
+
+/* Targets all common input types plus textarea and select */
+input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="datetime-local"], input[type="time"], textarea, select {
+  width: 100%;
+  padding: .5rem .72rem;
+  font-family: var(--font);
+  font-size: .83rem;
+  color: var(--ink);
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  appearance: none;              /* removes default browser styling */
+  transition: border-color var(--t), box-shadow var(--t);
+}
+
+/* Focus state - darkens the border and adds a subtle focus ring */
+input:focus, textarea:focus, select:focus {
+  border-color: #888;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.06);
+}
+
+/* Allow textarea to be resized vertically only, with a minimum height */
+textarea { resize: vertical; min-height: 85px; }
+
+
+/* ============================================================
+   SECTION 10 - CARDS AND INFO BLOCKS
+   
+   Cards are white boxes used throughout the app to group
+   related content. I have two versions:
+   
+   .card - generic card with padding
+   .card-grid - CSS grid that automatically fills columns
+   .info-card - slightly more structured card with inner spacing
+   ============================================================ */
+.card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; box-shadow: var(--shadow-sm); }
+
+/* auto-fill means the grid creates as many columns as will fit,
+   each at least 250px wide */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: .9rem; }
+
+.info-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: .9rem; box-shadow: var(--shadow-sm); }
+.info-card h3 { font-size: .92rem; font-weight: 600; margin-bottom: .65rem; }
+.info-card ul { padding-left: 1.1rem; }
+.info-card ul li { font-size: .82rem; color: var(--muted); margin-bottom: .22rem; }
+
+
+/* ============================================================
+   SECTION 11 - STAT CARDS (Dashboard)
+   
+   The row of numbered stats at the top of the dashboard page
+   e.g. "3 Languages Learning", "1 Language Teaching".
+   Uses CSS grid with auto-fill so it wraps on smaller screens.
+   ============================================================ */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: .85rem; margin-bottom: 1.4rem; }
+
+.stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: .95rem 1.1rem; box-shadow: var(--shadow-sm); }
+
+/* The large number e.g. "3" */
+.stat-card .stat-number { font-size: 1.9rem; font-weight: 700; color: var(--ink); line-height: 1; }
+
+/* The label below the number e.g. "LANGUAGES LEARNING" */
+.stat-card .stat-label { font-size: .7rem; font-weight: 500; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-top: .22rem; }
+
+
+/* ============================================================
+   SECTION 12 - USER CARDS (Browse Teachers page)
+   
+   Each user on the /users page is shown as a card in a grid.
+   The card uses flexbox with flex-direction: column so the
+   "View Profile" button can be pushed to the bottom with
+   margin-top: auto on the button.
+   ============================================================ */
+.user-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; gap: .35rem; box-shadow: var(--shadow-sm); transition: box-shadow var(--t), transform var(--t); }
+
+/* Subtle lift effect on hover */
+.user-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+/* Circular avatar showing the user's initial */
+.user-card .avatar { width: 42px; height: 42px; border-radius: 50%; background: #e8e8e8; color: var(--ink); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; font-weight: 700; margin-bottom: .15rem; }
+
+.user-card .name { font-size: .92rem; font-weight: 600; color: var(--ink); }
+
+/* Bio text is clamped to 2 lines with an ellipsis if it's longer */
+.user-card .bio { font-size: .78rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.user-card .rating { font-size: .75rem; color: var(--muted); }
+.user-card .rating span { color: #d97706; } /* amber/gold star colour */
+
+/* The "View Profile" button at the bottom of each user card */
+.user-card a.btn-view { margin-top: auto; display: inline-block; font-size: .74rem; font-weight: 500; color: var(--ink); padding: .32rem .7rem; border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: center; transition: background var(--t); }
+.user-card a.btn-view:hover { background: #f0f0f0; color: var(--ink); }
+
+/* Role badges - small coloured pills e.g. "LEARNER" or "TEACHER"
+   Each role has its own colour scheme to make them easy to spot */
+.role-badge { display: inline-block; font-size: .66rem; font-weight: 600; padding: .16rem .52rem; border-radius: 99px; letter-spacing: .03em; text-transform: uppercase; }
+.role-badge.learner { background: #ebf8ff; color: #2b6cb0; } /* blue */
+.role-badge.teacher { background: #f0fff4; color: #276749; } /* green */
+.role-badge.admin   { background: #fffbeb; color: #92400e; } /* amber */
+
+
+/* ============================================================
+   SECTION 13 - DATA TABLE
+   
+   Used on pages like Languages, Admin Users, Admin Reports.
+   border-collapse: collapse removes the double border that
+   appears between cells by default in HTML tables.
+   overflow: hidden clips the border-radius on the table edges.
+   ============================================================ */
+.data-table { width: 100%; border-collapse: collapse; font-size: .8rem; background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+
+/* Table headers - light grey background with uppercase text */
+.data-table th { background: #f8f8f8; color: var(--muted); font-weight: 600; font-size: .7rem; letter-spacing: .05em; text-transform: uppercase; padding: .6rem .95rem; text-align: left; border-bottom: 1px solid var(--border); }
+
+/* Table cells */
+.data-table td { padding: .6rem .95rem; border-bottom: 1px solid #f0f0f0; color: var(--ink); vertical-align: middle; }
+
+/* Remove bottom border from the last row */
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Subtle highlight on row hover */
+.data-table tbody tr:hover { background: #fafafa; }
+
+
+/* ============================================================
+   SECTION 14 - SESSION ROWS
+   
+   Used on the dashboard and sessions pages to show each session.
+   Each row uses flexbox: avatar on the left, info in the middle
+   (flex: 1 so it takes up remaining space), and action buttons
+   on the right.
+   ============================================================ */
+.session-row { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: .85rem 1.05rem; margin-bottom: .65rem; display: flex; align-items: center; gap: .85rem; box-shadow: var(--shadow-sm); }
+
+/* Circular avatar on the left of each session row */
+.session-row .s-avatar { width: 36px; height: 36px; border-radius: 50%; background: #e8e8e8; color: var(--ink); display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; flex-shrink: 0; }
+
+/* Info section - takes up all available space between avatar and buttons */
+.session-row .s-info { flex: 1; min-width: 0; } /* min-width: 0 prevents overflow */
+.session-row .s-info .s-name { font-size: .85rem; font-weight: 600; color: var(--ink); }
+.session-row .s-info .s-meta { font-size: .73rem; color: var(--muted); margin-top: .08rem; }
+
+/* Action buttons on the right */
+.session-row .s-actions { display: flex; align-items: center; gap: .38rem; flex-shrink: 0; flex-wrap: wrap; }
+
+/* Status badges - coloured pills showing session state.
+   The class is applied dynamically in Pug based on the status value
+   e.g. span.status-badge.pending, span.status-badge.accepted */
+.status-badge { display: inline-block; font-size: .65rem; font-weight: 600; padding: .18rem .52rem; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.status-badge.pending   { background: #fffbeb; color: #92400e; } /* amber */
+.status-badge.accepted  { background: #f0fff4; color: #276749; } /* green */
+.status-badge.declined  { background: #fff5f5; color: var(--red); } /* red */
+.status-badge.cancelled { background: #f5f5f5; color: var(--muted); } /* grey */
+
+
+/* ============================================================
+   SECTION 15 - TAB BAR (Sessions page)
+   
+   The three tabs at the top of the sessions page:
+   "Incoming Requests", "Upcoming", "History".
+   The active tab is filled dark so you can tell which one
+   you're currently viewing.
+   ============================================================ */
+.tab-bar { display: flex; gap: .2rem; margin-bottom: 1.1rem; }
+.tab-bar a { padding: .42rem 1rem; font-size: .8rem; font-weight: 500; color: var(--muted); border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--card-bg); transition: background var(--t), color var(--t), border-color var(--t); }
+.tab-bar a:hover { background: #f0f0f0; color: var(--ink); }
+.tab-bar a.active { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
+
+/* ============================================================
+   SECTION 16 - DASHBOARD LANGUAGE CARDS
+   
+   The grid of language cards on the dashboard showing which
+   languages the user is learning and teaching.
+   ============================================================ */
+.lang-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.lang-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: .85rem .95rem; box-shadow: var(--shadow-sm); }
+.lang-card .lang-name { font-size: .92rem; font-weight: 600; color: var(--ink); margin-bottom: .25rem; }
+.lang-card .lang-meta { font-size: .73rem; color: var(--muted); }
+
+
+/* ============================================================
+   SECTION 17 - PROFILE PAGE
+   
+   The header section at the top of a user's profile page,
+   showing their large avatar and basic info side by side.
+   ============================================================ */
+.profile-header { display: flex; align-items: flex-start; gap: 1.1rem; flex-wrap: wrap; margin-bottom: 1.3rem; }
+
+/* Larger avatar for the profile page */
+.profile-avatar-lg { width: 60px; height: 60px; border-radius: 50%; background: #e8e8e8; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; color: var(--ink); flex-shrink: 0; }
+
+.profile-info h2 { font-size: 1.05rem; margin-bottom: .18rem; }
+.profile-info p { font-size: .8rem; margin: .08rem 0; }
+
+
+/* ============================================================
+   SECTION 18 - TEACHER DETAIL PAGE
+   
+   The profile page when viewing a teacher uses a two-column
+   grid layout: a narrow left column (210px) for the teacher's
+   sidebar card with their photo, tags and request button,
+   and a wider right column for their bio, languages and reviews.
+   
+   This matches the wireframe in the Sprint 3 document.
+   ============================================================ */
+
+/* Two columns - fixed 210px left, remaining space on right */
+.teacher-detail { display: grid; grid-template-columns: 210px 1fr; gap: 1.1rem; align-items: start; }
+
+/* On small screens, collapse to a single column */
+@media (max-width: 680px) { .teacher-detail { grid-template-columns: 1fr; } }
+
+/* The left card with the teacher's avatar, info and request button */
+.teacher-sidebar-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; box-shadow: var(--shadow-sm); text-align: center; }
+.teacher-sidebar-card .t-avatar { width: 52px; height: 52px; border-radius: 50%; background: #e8e8e8; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; margin: 0 auto .55rem; }
+
+/* Small tag pills e.g. "Beginner-friendly", "Grammar" */
+.tag-pill { display: inline-block; padding: .18rem .55rem; background: #f0f0f0; border-radius: 99px; font-size: .7rem; color: var(--muted); margin: .1rem; border: 1px solid var(--border); }
+
+
+/* ============================================================
+   SECTION 19 - HOME PAGE
+   
+   The hero section and feature cards on the home page.
+   The hero is a dark card (same colour as the sidebar) with
+   white text, a search bar, and quick action buttons.
+   ============================================================ */
+.home-hero { background: var(--ink); color: var(--white); padding: 2.5rem 1.8rem; border-radius: var(--radius); margin-bottom: 1.3rem; }
+.home-hero h1 { color: var(--white); font-size: 1.4rem; margin-bottom: .55rem; }
+.home-hero p  { color: rgba(255,255,255,.68); margin-bottom: 1.1rem; font-size: .88rem; }
+
+/* Search bar inside the hero - inputs are semi-transparent on dark bg */
+.home-search { display: flex; gap: .45rem; max-width: 420px; margin-bottom: .9rem; }
+.home-search input { flex: 1; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); color: var(--white); font-size: .83rem; }
+.home-search input::placeholder { color: rgba(255,255,255,.42); }
+.home-search input:focus { border-color: rgba(255,255,255,.5); box-shadow: none; }
+.home-search button { background: var(--red); border-color: var(--red); }
+.home-search button:hover { background: var(--red-dark); }
+
+/* Quick action buttons below the search bar */
+.home-buttons { display: flex; gap: .45rem; flex-wrap: wrap; }
+.home-buttons button { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.22); color: var(--white); font-size: .78rem; }
+.home-buttons button:hover { background: rgba(255,255,255,.18); }
+
+/* Feature cards grid below the hero */
+.feature-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .85rem; margin-bottom: 1.3rem; }
+
+/* Popular language pill links */
+.lang-pills { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .7rem; }
+.lang-pills a span { display: inline-block; padding: .32rem .8rem; background: #f0f0f0; color: var(--ink); font-size: .76rem; font-weight: 500; border-radius: 99px; border: 1px solid var(--border); transition: background var(--t); }
+.lang-pills a span:hover { background: var(--ink); color: var(--white); }
+
+
+/* ============================================================
+   SECTION 20 - ADMIN PAGES
+   
+   Quick link buttons on the admin dashboard and consistent
+   table styling across admin management pages.
+   ============================================================ */
+.admin-links { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.1rem; }
+.admin-links a { padding: .38rem .85rem; font-size: .78rem; font-weight: 500; background: #f0f0f0; color: var(--ink); border-radius: var(--radius-sm); border: 1px solid var(--border); transition: background var(--t); }
+.admin-links a:hover { background: var(--ink); color: var(--white); }
+
+
+/* ============================================================
+   SECTION 21 - PUBLIC (NON-LOGGED-IN) LAYOUT
+
+   The top navigation bar shown on public pages like the home
+   page when the user is not signed in.
+   ============================================================ */
+
+.pub-header {
+  background: var(--sidebar-bg);
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 0 1.5rem;
+  height: var(--topbar-h);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-wrap: wrap;
+}
+
+.pub-logo {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--red);
+  padding: .3rem .8rem;
+  border-radius: var(--radius-sm);
+  margin-right: .4rem;
+}
+.pub-logo:hover { background: var(--red-dark); color: var(--white); }
+
+.pub-nav { display: flex; align-items: center; gap: .1rem; }
+.pub-nav a {
+  font-size: .78rem;
+  color: rgba(255,255,255,.55);
+  padding: .3rem .65rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--t), background var(--t);
+}
+.pub-nav a:hover { color: var(--white); background: var(--sidebar-hover); }
+
+.pub-content {
+  padding: 1.5rem 2rem;
+}
+
+
+/* ============================================================
+   SECTION 22 - RESPONSIVE DESIGN
+
+   On small screens, the sidebar is hidden and the main content
+   area takes up the full width. Grids and session rows stack
+   vertically rather than overflow horizontally.
+   ============================================================ */
+@media (max-width: 640px) {
+  :root { --sidebar-w: 0px; }  /* reset sidebar width to 0 */
+  .sidebar { display: none; }  /* hide the sidebar completely */
+  .main-wrap { margin-left: 0; } /* remove the sidebar offset */
+  .page-content { padding: 1rem; } /* reduce padding on small screens */
+  .stats-grid { grid-template-columns: repeat(2, 1fr); } /* 2 columns instead of 4 */
+  .session-row { flex-wrap: wrap; } /* allow session row to wrap vertically */
+  .teacher-detail { grid-template-columns: 1fr; } /* single column on mobile */
+}
+
+
+/* ============================================================
+   SECTION 23 - TABLE LINK CELLS, INLINE FORMS, MISC.
+
+   Small refinements for newer admin / community pages that
+   use compact tables with embedded forms and action buttons.
+   ============================================================ */
+
+/* Links inside data tables should use the dark ink colour rather
+   than red - keeps long tables visually calm. */
+.data-table a { color: var(--ink); font-weight: 500; }
+.data-table a:hover { color: var(--red); }
+
+/* Make the small inline select on the admin users page line up
+   with adjacent buttons rather than stretching to full width. */
+.s-actions select { width: auto; min-width: 100px; }
+
+/* Stop forms inside .s-actions adding their own block spacing. */
+.s-actions form { margin: 0; }
+
+/* When a card-grid contains info-cards, stop them collapsing their
+   margin-bottom and let the grid handle the spacing. */
+.card-grid > .info-card { margin-bottom: 0; }
+
+/* Anchor pills behave like buttons on hover */
+.lang-pills a { color: var(--ink); text-decoration: none; }
+.lang-pills a:hover span { background: var(--ink); color: var(--white); }
+
+/* Subtle helper for muted prose inside templates */
+.muted { color: var(--muted); font-size: .82rem; }
+
+/* Compact metadata line shown beneath the user's name on .user-card.
+   Both the @username handle and the country use a small grey style. */
+.user-card .user-handle, .user-card .user-country {
+  font-size: .72rem;
+  color: var(--muted);
+  display: inline-block;
+}
