@@ -1,0 +1,93 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'dashboard'
+
+block content
+  h2.page-title Welcome back, #{user.name}!
+
+  .stats-grid
+    .stat-card
+      .stat-number= stats.totalSessions
+      .stat-label Total Sessions
+    .stat-card
+      .stat-number= stats.acceptedSessions
+      .stat-label Accepted Sessions
+    .stat-card
+      .stat-number= stats.pendingCount
+      .stat-label Pending Requests
+    .stat-card
+      .stat-number= stats.reviewCount
+      .stat-label Reviews Received
+
+  if languages && languages.length > 0
+    h3(style='margin-bottom:.6rem;') Your Languages
+    .lang-cards
+      each lang in languages
+        .lang-card
+          .lang-name= lang.languageName
+          .lang-meta #{lang.languageType} · #{lang.proficiencyLevel}
+  else
+    p.muted No languages added yet.
+    a(href='/settings')
+      button(type='button') Add Languages
+
+  hr
+
+  h3(style='margin:1rem 0 .6rem;') Pending Requests
+  if pending.length === 0
+    p(style='color:var(--muted);font-size:.82rem;') No pending requests.
+  else
+    each s in pending
+      .session-row
+        .s-avatar= (String(user.id) === String(s.TeacherID) ? s.LearnerName : s.TeacherName)[0].toUpperCase()
+        .s-info
+          .s-name= String(user.id) === String(s.TeacherID) ? s.LearnerName : s.TeacherName
+          .s-meta= s.Meeting_Place + ' · ' + s.Scheduled_Time
+        .s-actions
+          span.status-badge.pending Pending
+          if String(user.id) === String(s.TeacherID)
+            form(action=`/sessions/${s.SessionID}/accept` method='POST' style='display:inline')
+              button.btn-sm(type='submit') Accept
+            form(action=`/sessions/${s.SessionID}/decline` method='POST' style='display:inline')
+              button.btn-sm.btn-outline(type='submit') Decline
+          else
+            form(action=`/sessions/${s.SessionID}/cancel` method='POST' style='display:inline')
+              button.btn-sm.btn-outline(type='submit') Cancel
+
+  hr
+
+  h3(style='margin:1rem 0 .6rem;') Upcoming Sessions
+  if upcoming.length === 0
+    p(style='color:var(--muted);font-size:.82rem;') No upcoming sessions.
+  else
+    each s in upcoming
+      .session-row
+        .s-avatar= (String(user.id) === String(s.TeacherID) ? s.LearnerName : s.TeacherName)[0].toUpperCase()
+        .s-info
+          .s-name= String(user.id) === String(s.TeacherID) ? s.LearnerName : s.TeacherName
+          .s-meta= s.Meeting_Place + ' · ' + s.Scheduled_Time
+        .s-actions
+          span.status-badge.accepted Accepted
+          if String(user.id) === String(s.LearnerID)
+            a(href=`/reviews/submit/${s.SessionID}`)
+              button.btn-sm(type='button') Leave Review
+
+  hr
+
+  h3(style='margin:1rem 0 .6rem;') Recent Reviews Received
+  if reviews.length === 0
+    p(style='color:var(--muted);font-size:.82rem;') No reviews yet.
+  else
+    each r in reviews
+      .session-row
+        .s-avatar= r.ReviewerName ? r.ReviewerName[0].toUpperCase() : '?'
+        .s-info
+          .s-name= r.ReviewerName
+          .s-meta= r.Comment || 'No comment.'
+        .s-actions
+          span.status-badge.accepted ★ #{r.Star_Rating} / 5
+
+  a(href='/sessions/my')
+    button(type='button' style='margin-top:1rem;') View All Sessions

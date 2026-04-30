@@ -1,0 +1,69 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'teachers'
+
+block content
+  .topbar-breadcrumb(style='margin-bottom:1rem;font-size:.8rem;')
+    a(href='/users') Browse Teachers
+    |  /
+    a(href='/users/'+teacher.id)= teacher.name
+    |  /
+    span Request Session
+
+  .card(style='max-width:560px;')
+    .session-row(style='margin-bottom:1.2rem;border:none;padding:0;box-shadow:none;')
+      .s-avatar= teacher.name ? teacher.name[0].toUpperCase() : '?'
+      .s-info
+        .s-name= teacher.name
+        .s-meta Teaching session request
+
+    if error
+      .alert.alert-error= error
+
+    form(action='/sessions/request' method='POST')
+      input(type='hidden' name='teacherId' value=teacher.id)
+
+      .form-group
+        label Preferred Date
+        input(type='date' name='preferred_date' required)
+
+      .form-group
+        label Preferred Time
+        input(type='time' name='preferred_time' placeholder='e.g. 18:00' required)
+
+      .form-group
+        label Session Topic / Focus (optional)
+        input(
+          type='text'
+          name='topic'
+          placeholder='e.g. Particles, reading practice…'
+        )
+
+      .form-group
+        label Message to Teacher
+        textarea(
+          name='initial_message'
+          placeholder='Introduce yourself and let the teacher know what you would like to work on…'
+        )
+
+      .form-group
+        label Meeting Place
+        input(
+          type='text'
+          name='meeting_place'
+          placeholder='e.g. Google Meet, Zoom, In person'
+          required
+        )
+
+      .form-group
+        label Scheduled Time
+        input(type='datetime-local' name='scheduled_time' required)
+
+      .s-actions(style='justify-content:flex-start;margin-top:.5rem;')
+        button.btn-red(type='submit') Send Request
+        a(href='/users/'+teacher.id)
+          button.btn-outline(type='button') Cancel
+
+      p(style='font-size:.73rem;color:var(--muted);margin-top:.7rem;') The teacher will be notified and can accept or decline your request.

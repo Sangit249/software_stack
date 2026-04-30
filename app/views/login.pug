@@ -1,0 +1,41 @@
+extends layout
+
+block vars
+  - var authPage = true
+  - var activePage = ''
+
+block content
+  .auth-box
+    span.auth-logo LingoConnect
+    h2 Welcome Back
+    p.auth-subtitle Sign in to your account
+
+    .auth-tabs
+      a.active(href='/login') Login
+      a(href='/signup') Register
+
+    if error
+      .alert.alert-error= error
+
+    form(method='POST' action='/login')
+      .form-group
+        label(for='emailOrUsername') Email Address
+        input#emailOrUsername(
+          type='text'
+          name='emailOrUsername'
+          placeholder='you@example.com'
+          required
+          value=emailOrUsername || ''
+        )
+      .form-group
+        label(for='password') Password
+        input#password(type='password' name='password' placeholder='password' required)
+        a.auth-forgot(href='#') Forgot password?
+
+      button.btn-submit(type='submit') Sign In
+
+    .auth-divider or
+
+    p.auth-footer
+      | Don't have an account?&nbsp;
+      a(href='/signup') Create one here

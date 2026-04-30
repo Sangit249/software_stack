@@ -1,19 +1,42 @@
 extends layout
 
-block content
-  h2 User Languages
+block vars
+  - var authPage = false
+  - var activePage = 'userlanguages'
 
-  table
-    thead
-      tr
-        th User ID
-        th User Name
-        th Language ID
-        th Language Name
-    tbody
-      each item in userLanguages
+block content
+  h2.page-title User Languages
+
+  p(style='color:var(--muted);font-size:.85rem;margin-bottom:1rem;') A directory of every user on the platform along with the languages they speak.
+
+  if !userLanguages || userLanguages.length === 0
+    .info-card
+      p(style='color:var(--muted);') No user-language pairings yet.
+  else
+    .stats-grid
+      .stat-card
+        .stat-number= userLanguages.length
+        .stat-label Pairings
+      .stat-card
+        - var uniqueUsers = new Set(userLanguages.map(u => u.UserID)).size
+        .stat-number= uniqueUsers
+        .stat-label Users
+      .stat-card
+        - var uniqueLangs = new Set(userLanguages.map(u => u.LanguageID)).size
+        .stat-number= uniqueLangs
+        .stat-label Languages
+
+    table.data-table
+      thead
         tr
-          td= item.UserID
-          td= item.Full_Name
-          td= item.LanguageID
-          td= item.Language_Name
+          th User
+          th Language
+          th
+      tbody
+        each item in userLanguages
+          tr
+            td
+              a(href='/users/' + item.UserID)= item.Full_Name
+            td= item.Language_Name
+            td
+              a(href='/users/' + item.UserID) View profile →

@@ -1,117 +1,114 @@
-doctype html
-html
-  head
-    meta(charset="UTF-8")
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title User Profile
+extends layout
 
-  body
-    h1 User Profile
+block vars
+  - var authPage = false
+  - var activePage = 'profile'
 
-    if user
-      h2 Basic Information
-      p
-        strong User ID:
-        |  #{user.UserID}
-      p
-        strong Full Name:
-        |  #{user.Full_Name}
-      p
-        strong Username:
-        |  #{user.Username}
-      p
-        strong Email:
-        |  #{user.Email}
-      p
-        strong Country:
-        |  #{user.Country}
-      p
-        strong Role:
-        |  #{user.Role}
-      p
-        strong Bio:
-        |  #{user.Bio}
-      p
-        strong Profile Image:
-        |  #{user.Profile_Image}
-      p
-        strong Average Rating:
-        |  #{user.Average_Rating}
-      p
-        strong Joined Date:
-        |  #{user.Joined_Date}
-      p
-        strong Last Active:
-        |  #{user.Last_Active}
-    else
-      p No user data found.
+block content
+  if user
+    .profile-header
+      .profile-avatar-lg= user.name ? user.name[0].toUpperCase() : '?'
+      .profile-info
+        h2= user.name
+        p @#{user.username}
+        if user.country
+          p= user.country
+        if user.programme
+          span.role-badge(class=user.programme.toLowerCase())= user.programme
 
-    hr
+    if reported
+      .alert.alert-success Your report has been submitted successfully.
 
-    h2 Languages
+    if currentUser && currentUser.id != user.id
+      .s-actions(style='margin-bottom:1rem;display:flex;gap:.5rem;')
+        a(href=`/sessions/request/${user.id}`)
+          button(type='button') Request a Session
+        a(href=`/reports/submit/${user.id}`)
+          button.btn-outline-red(type='button') Report User
+
+    .info-card
+      h3 About
+      p= user.bio || 'No bio provided.'
+      if user.averageRating && Number(user.averageRating) > 0
+        p ★ #{Number(user.averageRating).toFixed(1)} average rating
+      if user.email
+        p
+          strong Email:&nbsp;
+          | #{user.email}
+      if user.country
+        p
+          strong Country:&nbsp;
+          | #{user.country}
+      if user.joinedDate
+        p
+          strong Joined:&nbsp;
+          | #{user.joinedDate}
+      if user.lastActive
+        p
+          strong Last active:&nbsp;
+          | #{user.lastActive}
+
+    if user.modules && user.modules.length > 0
+      .info-card
+        h3 Languages at a Glance
+        .lang-pills(style='margin-top:.4rem;')
+          each m in user.modules
+            span.tag-pill= m
+
     if languages && languages.length > 0
-      table(border="1")
-        thead
-          tr
-            th Language
-            th Language Type
-            th Proficiency Level
-        tbody
-          each language in languages
+      .info-card
+        h3 Languages
+        table.data-table
+          thead
             tr
-              td= language.languageName || "N/A"
-              td= language.languageType || "N/A"
-              td= language.proficiencyLevel || "N/A"
-    else
-      p No languages found.
+              th Language
+              th Type
+              th Proficiency
+          tbody
+            each language in languages
+              tr
+                td= language.languageName || 'N/A'
+                td= language.languageType || 'N/A'
+                td= language.proficiencyLevel || 'N/A'
 
-    hr
-
-    h2 Availability
     if availability && availability.length > 0
-      table(border="1")
-        thead
-          tr
-            th Day
-            th Start Time
-            th End Time
-            th Time Zone
-        tbody
-          each slot in availability
+      .info-card
+        h3 Availability
+        table.data-table
+          thead
             tr
-              td= slot.dayOfWeek || "N/A"
-              td= slot.startTime || "N/A"
-              td= slot.endTime || "N/A"
-              td= slot.timeZone || "N/A"
-    else
-      p No availability data found.
+              th Day
+              th Start
+              th End
+              th Time Zone
+          tbody
+            each slot in availability
+              tr
+                td= slot.dayOfWeek || 'N/A'
+                td= slot.startTime || 'N/A'
+                td= slot.endTime || 'N/A'
+                td= slot.timeZone || 'N/A'
 
-    hr
-
-    h2 Interests
     if interests && interests.length > 0
-      ul
-        each interest in interests
-          li= interest.interestName || "N/A"
-    else
-      p No interests found.
+      .info-card
+        h3 Interests
+        ul
+          each interest in interests
+            li= interest.interestName || 'N/A'
 
-    hr
-
-    h2 Preferences
     if preferences
-      p
-        strong Practice Method:
-        |  #{preferences.practiceMethod || "N/A"}
-      p
-        strong Preferred Session Type:
-        |  #{preferences.preferredSessionType || "N/A"}
-      p
-        strong Learning Goal:
-        |  #{preferences.learningGoal || "N/A"}
-    else
-      p No preferences found.
+      .info-card
+        h3 Preferences
+        p
+          strong Practice Method:&nbsp;
+          | #{preferences.practiceMethod || 'N/A'}
+        p
+          strong Session Type:&nbsp;
+          | #{preferences.preferredSessionType || 'N/A'}
+        p
+          strong Learning Goal:&nbsp;
+          | #{preferences.learningGoal || 'N/A'}
 
-    hr
+  else
+    p No user data found.
 
-    a(href="/users") Back to Users List

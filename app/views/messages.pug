@@ -1,0 +1,25 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'messages'
+
+block content
+  h2.page-title Messages
+
+  if conversations.length === 0
+    .info-card
+      p(style='color:var(--muted);') You have no conversations yet. Accept a session request to start messaging.
+  else
+    each c in conversations
+      .session-row
+        .s-avatar= (String(user.id) === String(c.TeacherID) ? c.LearnerName : c.TeacherName)[0].toUpperCase()
+        .s-info
+          .s-name= String(user.id) === String(c.TeacherID) ? c.LearnerName : c.TeacherName
+          if c.UnreadCount > 0
+            .s-meta(style='color:var(--red);font-weight:600;') #{c.UnreadCount} unread message(s)
+          else
+            .s-meta No new messages
+        .s-actions
+          a(href=`/messages/${c.SessionID}`)
+            button.btn-sm(type='button') Open

@@ -1,19 +1,32 @@
 extends layout
 
-block content
-  h2 Reviews
+block vars
+  - var authPage = false
+  - var activePage = 'reviews'
 
-  table
-    thead
-      tr
-        th Review ID
-        th Session ID
-        th Star Rating
-        th Comment
-    tbody
+block content
+  h2.page-title All Reviews
+
+  p(style='color:var(--muted);font-size:.85rem;margin-bottom:1rem;') Browse every review submitted on LingoConnect.
+
+  if !reviews || reviews.length === 0
+    .info-card
+      p(style='color:var(--muted);') No reviews have been left yet.
+  else
+    .stats-grid
+      .stat-card
+        .stat-number= reviews.length
+        .stat-label Total Reviews
+      .stat-card
+        - var avg = reviews.reduce((s, r) => s + Number(r.Star_Rating || 0), 0) / reviews.length
+        .stat-number ★ #{avg.toFixed(1)}
+        .stat-label Average Rating
+
+    .card-grid
       each review in reviews
-        tr
-          td= review.ReviewID
-          td= review.SessionID
-          td= review.Star_Rating
-          td= review.Comment
+        .info-card(style='margin-bottom:0;')
+          .s-actions(style='justify-content:space-between;margin-bottom:.5rem;')
+            span.status-badge.accepted ★ #{review.Star_Rating} / 5
+            span(style='font-size:.7rem;color:var(--muted);') Review ##{review.ReviewID}
+          h3(style='font-size:.85rem;margin-bottom:.4rem;') Session ##{review.SessionID}
+          p(style='font-size:.82rem;color:var(--ink);') #{review.Comment || 'No comment provided.'}

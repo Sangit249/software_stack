@@ -1,15 +1,38 @@
 extends layout
 
-block content
-  h2 Languages
+block vars
+  - var authPage = false
+  - var activePage = 'languages'
 
-  table
-    thead
-      tr
-        th Language ID
-        th Language Name
-    tbody
+block content
+  h2.page-title Languages
+
+  p.muted(style='margin-bottom:1rem;') Every language available on LingoConnect. Click one to find learners and teachers who speak it.
+
+  if !languages || languages.length === 0
+    .info-card
+      p.muted No languages have been added yet.
+  else
+    .stats-grid
+      .stat-card
+        .stat-number= languages.length
+        .stat-label Languages Available
+
+    .lang-pills(style='margin-bottom:1.2rem;')
       each language in languages
+        a(href='/search?query=' + encodeURIComponent(language.Language_Name))
+          span= language.Language_Name
+
+    table.data-table
+      thead
         tr
-          td= language.LanguageID
-          td= language.Language_Name
+          th ID
+          th Language
+          th Find Speakers
+      tbody
+        each language in languages
+          tr
+            td= language.LanguageID
+            td= language.Language_Name
+            td
+              a(href='/search?query=' + encodeURIComponent(language.Language_Name)) Search

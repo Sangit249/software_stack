@@ -1,0 +1,43 @@
+extends layout
+
+block vars
+  - var authPage = false
+  - var activePage = 'messages'
+
+block content
+  .topbar-breadcrumb(style='margin-bottom:1rem;font-size:.8rem;')
+    a(href='/messages') Messages
+    |  /
+    span= String(user.id) == String(session.TeacherID) ? session.LearnerName : session.TeacherName
+
+  h2.page-title
+    | Conversation with&nbsp;
+    | #{String(user.id) == String(session.TeacherID) ? session.LearnerName : session.TeacherName}
+
+  .card(style='max-height:400px;overflow-y:auto;margin-bottom:1rem;padding:.85rem 1rem;')
+    if messages.length === 0
+      p(style='color:var(--muted);font-size:.82rem;') No messages yet. Say hello!
+    else
+      each m in messages
+        div(
+          style=`margin-bottom:.75rem;text-align:${String(m.SenderID)===String(user.id)?'right':'left'};`
+        )
+          div(
+            style=`display:inline-block;max-width:72%;padding:.5rem .8rem;border-radius:var(--radius);font-size:.82rem;background:${String(m.SenderID)===String(user.id)?'#e0f2e0':'#f0f0f0'};`
+          )
+            p(style='margin:0;font-weight:600;font-size:.72rem;')= m.SenderName
+            p(style='margin:.2rem 0 0;')= m.Content
+            p(style='margin:.2rem 0 0;font-size:.7rem;color:var(--muted);')= m.Sent_At
+
+  .card(style='padding:.85rem 1rem;')
+    form(action=`/messages/${session.SessionID}` method='POST')
+      .form-group
+        textarea(
+          name='content'
+          placeholder='Type your message…'
+          required
+        )
+      button.btn-red(type='submit') Send Message
+
+  a(href='/messages')
+    button.btn-outline(type='button' style='margin-top:.5rem;') Back to Messages
