@@ -1,4 +1,4 @@
-# Community Language Learn & Teach (CLLT)
+# Lingo Connect
 ### A Full-Stack Peer-to-Peer Education Ecosystem
 
 ##  Introduction
